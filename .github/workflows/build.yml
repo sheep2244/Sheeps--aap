@@ -24,12 +24,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
 
-      - name: Restore original main.dart & Fix Android Project
+      - name: Preserve full lib directory & Migrate Android
         run: |
-          cp lib/main.dart lib/main_backup.dart || true
+          cp -r lib lib_backup || true
           flutter create . --org com.example --project-name sheeps_app || true
-          cp lib/main_backup.dart lib/main.dart || true
-          rm lib/main_backup.dart || true
+          rm -rf lib || true
+          cp -r lib_backup lib || true
+          rm -rf lib_backup || true
 
       - name: Install Dependencies
         run: flutter pub get
