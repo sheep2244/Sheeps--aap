@@ -24,13 +24,18 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
 
+      - name: Restore original main.dart & Fix Android Project
+        run: |
+          cp lib/main.dart lib/main_backup.dart || true
+          flutter create . --org com.example --project-name sheeps_app || true
+          cp lib/main_backup.dart lib/main.dart || true
+          rm lib/main_backup.dart || true
+
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Fix Android Embedding / Build APK
-        run: |
-          flutter create . --org com.example --project-name sheeps_app || true
-          flutter build apk --release --no-tree-shake-icons
+      - name: Build APK
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
