@@ -24,11 +24,14 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
 
-      - name: Clean Android Setup & Keep Original Code
+      - name: Rebuild Android and Restore Original FlutterFlow Code
         run: |
-          # 1. Purane android folder ko hata kar naya v2 embedding android setup banayein
+          # 1. Android folder naya banayein
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
+          
+          # 2. Revert any modified source code back to original repository code
+          git checkout -- lib/
 
       - name: Install Dependencies
         run: flutter pub get
