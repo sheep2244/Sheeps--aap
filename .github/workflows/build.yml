@@ -24,14 +24,17 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
 
-      - name: Rebuild Android and Restore Original FlutterFlow Code
+      - name: Fix Android V2 Embedding without touching lib
         run: |
-          # 1. Android folder naya banayein
+          # 1. Purani main.dart ko ek jagah safe copy kar lein
+          cp lib/main.dart /tmp/original_main.dart || true
+          
+          # 2. Android files recreate karein
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
           
-          # 2. Revert any modified source code back to original repository code
-          git checkout -- lib/
+          # 3. Asli main.dart ko wapas zaroor overwrite karein
+          cp /tmp/original_main.dart lib/main.dart
 
       - name: Install Dependencies
         run: flutter pub get
