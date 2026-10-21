@@ -24,13 +24,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
 
-      - name: Preserve full lib directory & Migrate Android
+      - name: Clean Android Setup & Keep Original Code
         run: |
-          cp -r lib lib_backup || true
-          flutter create . --org com.example --project-name sheeps_app || true
-          rm -rf lib || true
-          cp -r lib_backup lib || true
-          rm -rf lib_backup || true
+          # 1. Purane android folder ko hata kar naya v2 embedding android setup banayein
+          rm -rf android
+          flutter create . --org com.example --project-name sheeps_app
 
       - name: Install Dependencies
         run: flutter pub get
