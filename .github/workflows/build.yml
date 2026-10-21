@@ -24,18 +24,19 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
 
-      - name: Rebuild Android and Restore FULL Original Code
+      - name: Fix Android Environment safely
         run: |
-          # 1. Poore original lib folder ka backup lein
-          cp -r lib /tmp/original_lib_backup
+          # 1. Temporary location par lib folder ka backup lein
+          mkdir -p /tmp/flutterflow_backup
+          cp -r lib /tmp/flutterflow_backup/
           
-          # 2. Android setup recreate karein
+          # 2. Android folder recreate karein
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
           
-          # 3. Naye generated lib ko hata kar poora original lib wapas layein
+          # 3. Flutter create dwara banaye gaye new lib ko delete karke original code restore karein
           rm -rf lib
-          cp -r /tmp/original_lib_backup lib
+          cp -r /tmp/flutterflow_backup/lib .
 
       - name: Install Dependencies
         run: flutter pub get
