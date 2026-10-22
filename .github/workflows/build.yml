@@ -42,7 +42,7 @@ jobs:
             Widget build(BuildContext context) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'Sheeps App',
+                title: 'AI Sheeps Dashboard',
                 theme: ThemeData(
                   primarySwatch: Colors.green,
                   useMaterial3: true,
@@ -61,74 +61,175 @@ jobs:
 
           class _SheepDashboardState extends State<SheepDashboard> {
             int totalSheeps = 15;
+            bool isScanning = false;
+            bool missingFound = false;
+
+            void startGroupScan() {
+              setState(() {
+                isScanning = true;
+                missingFound = false;
+              });
+
+              Future.delayed(const Duration(seconds: 3), () {
+                setState(() {
+                  isScanning = false;
+                  missingFound = true;
+                });
+              });
+            }
 
             @override
             Widget build(BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text('Sheeps Dashboard', style: TextStyle(color: Colors.white)),
+                  title: const Text('AI Sheep Tracker', style: TextStyle(color: Colors.white)),
                   backgroundColor: Colors.green.shade700,
                   centerTitle: true,
                 ),
-                body: Padding(
+                body: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Total Counter Card
                       Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         color: Colors.green.shade50,
                         child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Total Sheeps Registered',
-                                style: TextStyle(fontSize: 18, color: Colors.black87),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Total Registered', style: TextStyle(fontSize: 16, color: Colors.black87)),
+                                  Text('$totalSheeps', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.green.shade800)),
+                                ],
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                '$totalSheeps',
-                                style: TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green.shade800,
-                                ),
-                              ),
+                              Icon(Icons.pets, size: 48, color: Colors.green.shade700),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
+
+                      // AI Camera Group Scan Button
                       ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            totalSheeps++;
-                          });
-                        },
-                        icon: const Icon(Icons.add, color: Colors.white),
-                        label: const Text('Add New Sheep', style: TextStyle(fontSize: 16, color: Colors.white)),
+                        onPressed: isScanning ? null : startGroupScan,
+                        icon: const Icon(Icons.camera_alt, color: Colors.white),
+                        label: Text(
+                          isScanning ? 'Scanning Group with AI...' : 'Group Scan (Without Tags)',
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade600,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            if (totalSheeps > 0) totalSheeps--;
-                          });
-                        },
-                        icon: const Icon(Icons.remove, color: Colors.red),
-                        label: const Text('Remove Sheep', style: TextStyle(fontSize: 16, color: Colors.red)),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          side: const BorderSide(color: Colors.red),
+
+                      if (isScanning) ...[
+                        const SizedBox(height: 20),
+                        const Center(
+                          child: Column(
+                            children: [
+                              CircularProgressIndicator(color: Colors.green),
+                              SizedBox(height: 10),
+                              Text('AI Bhedon ka Chehra Scan kar raha hai...'),
+                            ],
+                          ),
                         ),
+                      ],
+
+                      // Missing Sheep Result Card
+                      if (missingFound) ...[
+                        const SizedBox(height: 20),
+                        Card(
+                          elevation: 6,
+                          color: Colors.red.shade50,
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.red.shade400, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.warning, color: Colors.red.shade700),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'MISSING SHEEP DETECTED!',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(Icons.pets, size: 50, color: Colors.grey),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Sheep ID: #SH-009', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                          Text('Breed: Marwari Sheep'),
+                                          Text('Status: GUM HUI HAI'),
+                                          Text('Pin/Location: Field North Zone (Offline)', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  totalSheeps++;
+                                });
+                              },
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              label: const Text('Add Sheep'),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade600),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  if (totalSheeps > 0) totalSheeps--;
+                                });
+                              },
+                              icon: const Icon(Icons.remove, color: Colors.red),
+                              label: const Text('Remove'),
+                              style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
