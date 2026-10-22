@@ -21,24 +21,14 @@ jobs:
           flutter-version: '3.10.6'
           channel: 'stable'
 
-      - name: Recreate Android Project Safely
+      - name: Recreate Android Project
         run: |
-          # 1. Poore original code ka safe backup lein
-          mkdir -p /tmp/ff_backup
-          cp -r lib /tmp/ff_backup/
-          
-          # 2. Android folder recreate karein
+          mkdir -p /tmp/original_code
+          cp -r lib /tmp/original_code/
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
-          
-          # 3. FlutterFlow ka poora code wapas restore karein
           rm -rf lib
-          cp -r /tmp/ff_backup/lib .
-          
-          # 4. Agar lib ke andar index.dart ya koi asli FlutterFlow main file hai, use set karein
-          if [ -f "lib/index.dart" ]; then
-            echo "import 'index.dart';" > lib/main_entry.dart
-          fi
+          cp -r /tmp/original_code/lib .
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
@@ -46,7 +36,7 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build APK (Targeting FlutterFlow UI)
         run: |
           if [ -f "lib/index.dart" ]; then
             flutter build apk --release --target=lib/index.dart --no-tree-shake-icons
