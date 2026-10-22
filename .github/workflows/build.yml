@@ -23,12 +23,13 @@ jobs:
 
       - name: Recreate Android Project
         run: |
-          mkdir -p /tmp/original_code
-          cp -r lib /tmp/original_code/
+          mkdir -p /tmp/my_lib
+          cp -r lib/* /tmp/my_lib/
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
           rm -rf lib
-          cp -r /tmp/original_code/lib .
+          mkdir -p lib
+          cp -r /tmp/my_lib/* lib/
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
