@@ -21,7 +21,12 @@ jobs:
           flutter-version: '3.10.6'
           channel: 'stable'
 
-      - name: Inject Dashboard Code into main.dart
+      - name: Recreate Android Project
+        run: |
+          rm -rf android
+          flutter create . --org com.example --project-name sheeps_app
+
+      - name: Overwrite main.dart
         run: |
           cat << 'EOF' > lib/main.dart
           import 'package:flutter/material.dart';
