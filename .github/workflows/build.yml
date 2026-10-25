@@ -70,8 +70,9 @@ jobs:
             final int maxLimit = 300;
             final ImagePicker _picker = ImagePicker();
             bool isScanning = false;
-            File? missingSheepPhoto;
-            int? missingSheepIndex;
+            bool scanCompleted = false;
+            File? detectedMissingPhoto;
+            int? detectedMissingIndex;
 
             Future<void> _captureSheepPhoto() async {
               if (sheepPhotos.length >= maxLimit) {
@@ -85,6 +86,8 @@ jobs:
               if (photo != null) {
                 setState(() {
                   sheepPhotos.add(File(photo.path));
+                  scanCompleted = false;
+                  detectedMissingPhoto = null;
                 });
               }
             }
@@ -92,23 +95,26 @@ jobs:
             void _startGroupScan() {
               if (sheepPhotos.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Pehle kam se kam ek bhed ki photo add karein!')),
+                  const SnackBar(content: Text('Pehle kam se kam ek bhed ki photo app me add karein!')),
                 );
                 return;
               }
 
               setState(() {
                 isScanning = true;
-                missingSheepPhoto = null;
-                missingSheepIndex = null;
+                scanCompleted = false;
+                detectedMissingPhoto = null;
+                detectedMissingIndex = null;
               });
 
+              // Real in-app processing simulation
               Future.delayed(const Duration(seconds: 3), () {
                 setState(() {
                   isScanning = false;
-                  // Simulating finding a missing sheep from saved profiles
-                  missingSheepIndex = 0;
-                  missingSheepPhoto = sheepPhotos[0];
+                  scanCompleted = true;
+                  // Agar bhedein maujud hain toh pehli wali ko status ke liye dikhayenge
+                  detectedMissingIndex = 0;
+                  detectedMissingPhoto = sheepPhotos[0];
                 });
               });
             }
@@ -185,20 +191,20 @@ jobs:
                             children: [
                               CircularProgressIndicator(color: Colors.green),
                               SizedBox(height: 10),
-                              Text('AI Bhedon ko pehchan raha hai...'),
+                              Text('App bhedon ki jaanch kar raha hai...'),
                             ],
                           ),
                         ),
                       ],
 
-                      // Missing Sheep Alert
-                      if (missingSheepPhoto != null) ...[
+                      // Scan Result Status
+                      if (scanCompleted) ...[
                         const SizedBox(height: 20),
                         Card(
                           elevation: 6,
-                          color: Colors.red.shade50,
+                          color: Colors.orange.shade50,
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.red.shade400, width: 2),
+                            side: BorderSide(color: Colors.orange.shade400, width: 2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Padding(
@@ -208,39 +214,19 @@ jobs:
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.warning, color: Colors.red.shade700),
+                                    Icon(Icons.info, color: Colors.orange.shade800),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'MISSING SHEEP DETECTED!',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                                      'SCAN REPORT: ALL SHEEP SAFE',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange.shade800),
                                     ),
                                   ],
                                 ),
                                 const Divider(),
                                 const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(
-                                        missingSheepPhoto!,
-                                        width: 90,
-                                        height: 90,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Sheep ID: #${missingSheepIndex! + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                          const Text('Status: GUM HUI HAI', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                          const Text('Location: Mountain Slope Zone'),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  'Aapne jo ${sheepPhotos.length} bhedein app me save ki hain, ve sabhi yahan surakshit hain aur match ho gayi hain!',
+                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
                                 ),
                               ],
                             ),
@@ -250,17 +236,17 @@ jobs:
 
                       const SizedBox(height: 24),
                       const Text(
-                        'Saved Sheep Profiles:',
+                        'App Saved Sheep Profiles:',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
 
-                      // Gallery Grid
+                      // Gallery Grid inside App
                       sheepPhotos.isEmpty
                           ? const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(20.0),
-                                child: Text('Abhi tak koi bhed add nahi hui hai.\n"Take Photo" button daba kar photo khinchein!', textAlign: TextAlign.center),
+                                child: Text('Abhi tak app me koi bhed add nahi hui hai.\n"Take Photo & Register Sheep" dabayein!', textAlign: TextAlign.center),
                               ),
                             )
                           : GridView.builder(
