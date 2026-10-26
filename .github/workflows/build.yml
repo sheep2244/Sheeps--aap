@@ -56,8 +56,8 @@ jobs:
               required this.id,
               required this.name,
               required this.photo,
-              this.breed = 'Marwari (मारवाड़ी)',
-              this.age = '18 Months',
+              this.breed = 'मारवाड़ी (Marwari)',
+              this.age = '18 महीने',
               this.gender = 'मादा (Female)',
               this.isChecked = false,
               this.isMissing = false,
@@ -71,7 +71,7 @@ jobs:
             Widget build(BuildContext context) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'AI Sheep Tracker & Health Care',
+                title: 'एआई भेड़ ट्रैकर एवं स्वास्थ्य देखभाल',
                 theme: ThemeData(
                   primarySwatch: Colors.green,
                   useMaterial3: true,
@@ -97,7 +97,7 @@ jobs:
             Future<void> _captureSheepPhoto() async {
               if (sheepList.length >= maxLimit) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Maximum limit of 300 sheeps reached!')),
+                  const SnackBar(content: Text('अधिकतम 300 भेड़ों की सीमा पूरी हो चुकी है!')),
                 );
                 return;
               }
@@ -109,7 +109,7 @@ jobs:
                   sheepList.add(
                     SheepModel(
                       id: 'SHEEP_QR_$nextId',
-                      name: 'Bhed #$nextId',
+                      name: 'भेड़ #$nextId',
                       photo: File(photo.path),
                     ),
                   );
@@ -167,7 +167,7 @@ jobs:
                                 child: Column(
                                   children: [
                                     const Text(
-                                      'sheeps_app Digital ID Card',
+                                      'डिजिटल पहचान पत्र (Digital ID)',
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
                                     ),
                                     const SizedBox(height: 12),
@@ -208,13 +208,13 @@ jobs:
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text('ID: ${sheep.id}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                                            Text('आईडी: ${sheep.id}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                                             const SizedBox(height: 6),
-                                            Text('नस्ल / Breed: ${sheep.breed}', style: const TextStyle(fontSize: 14)),
+                                            Text('नस्ल: ${sheep.breed}', style: const TextStyle(fontSize: 14)),
                                             const SizedBox(height: 6),
-                                            Text('उम्र / Age: ${sheep.age}', style: const TextStyle(fontSize: 14)),
+                                            Text('उम्र: ${sheep.age}', style: const TextStyle(fontSize: 14)),
                                             const SizedBox(height: 6),
-                                            Text('लिंग / Gender: ${sheep.gender}', style: const TextStyle(fontSize: 14)),
+                                            Text('लिंग: ${sheep.gender}', style: const TextStyle(fontSize: 14)),
                                           ],
                                         ),
                                         QrImageView(
@@ -237,7 +237,7 @@ jobs:
                                             _toggleStatus(sheep, sheep.isChecked, null);
                                           },
                                           icon: Icon(Icons.check_circle, color: sheep.isChecked ? Colors.white : Colors.green),
-                                          label: Text(sheep.isChecked ? 'Verified (मिल गई)' : 'Mark Found'),
+                                          label: Text(sheep.isChecked ? 'मिल गई (Verified)' : 'उपस्थित दर्ज करें'),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: sheep.isChecked ? Colors.green : Colors.white,
                                             foregroundColor: sheep.isChecked ? Colors.white : Colors.green,
@@ -252,7 +252,7 @@ jobs:
                                             _toggleStatus(sheep, null, sheep.isMissing);
                                           },
                                           icon: Icon(Icons.warning, color: sheep.isMissing ? Colors.white : Colors.red),
-                                          label: Text(sheep.isMissing ? 'Missing (खोई)' : 'Mark Missing'),
+                                          label: Text(sheep.isMissing ? 'खोई हुई (Missing)' : 'गुम घोषित करें'),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: sheep.isMissing ? Colors.red : Colors.white,
                                             foregroundColor: sheep.isMissing ? Colors.white : Colors.red,
@@ -292,7 +292,7 @@ jobs:
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Total Registered Sheeps', style: TextStyle(fontSize: 14)),
+                                const Text('कुल दर्ज भेड़ें', style: TextStyle(fontSize: 14)),
                                 Text('${sheepList.length} / $maxLimit', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.green.shade800)),
                               ],
                             ),
@@ -305,17 +305,17 @@ jobs:
                     ElevatedButton.icon(
                       onPressed: _captureSheepPhoto,
                       icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                      label: const Text('Take Photo & Generate QR Code', style: TextStyle(fontSize: 16, color: Colors.white)),
+                      label: const Text('फोटो खींचें और QR कोड बनाएं', style: TextStyle(fontSize: 16, color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green.shade600,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Saved Sheep Profiles (Green = Found, Red = Missing):', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text('सहेजी गई भेड़ें (हरी टिक = मिल गई, लाल निशान = गुम):', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     sheepList.isEmpty
-                        ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('No sheep registered yet.')))
+                        ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('अभी तक कोई भेड़ दर्ज नहीं की गई है।')))
                         : GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -378,7 +378,7 @@ jobs:
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const Text('💉 Tika aur Dawai Guide (Visual & Detail)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                  const Text('💉 टीका एवं दवा मार्गदर्शिका (स्वास्थ्य गाइड)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
                   const SizedBox(height: 8),
                   
                   // 1. PPR Vaccine
@@ -398,12 +398,12 @@ jobs:
                               ),
                               const SizedBox(width: 12),
                               const Expanded(
-                                child: Text('PPR Vaccine (पीपीआर का टीका)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                child: Text('पीपीआर का टीका (PPR Vaccine)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('• Kab lagaye: 3 mahine ki umra me (har 3 saal me ek baar).\n• Kaise de: Skin ke niche subcutaneous injection (1 ml).\n• Fayda: Mahamari bukhar, muh ke chaale aur dast se bachaav.'),
+                          const Text('• कब लगाएं: 3 महीने की उम्र में (हर 3 साल में एक बार)।\n• कैसे दें: चमड़ी के नीचे (Subcutaneous) 1 मिलीलीटर इंजेक्शन।\n• फायदा: महामारी बुखार, मुँह के छाले और दस्त से बचाव।'),
                         ],
                       ),
                     ),
@@ -426,12 +426,12 @@ jobs:
                               ),
                               const SizedBox(width: 12),
                               const Expanded(
-                                child: Text('FMD Vaccine (खुरपका-मुँहपका)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                child: Text('खुरपका-मुँहपका टीका (FMD Vaccine)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('• Kab lagaye: Saal me 2 baar (May-June aur Nov-Dec).\n• Kaise de: Muscle me injection (2 ml).\n• Fayda: Muh aur khur ke zakhmo se suraksha.'),
+                          const Text('• कब लगाएं: साल में 2 बार (मई-जून और नवंबर-दिसंबर)।\n• कैसे दें: मांस में (Muscle) 2 मिलीलीटर इंजेक्शन।\n• फायदा: मुँह और खुर के घावों से संपूर्ण सुरक्षा।'),
                         ],
                       ),
                     ),
@@ -454,25 +454,25 @@ jobs:
                               ),
                               const SizedBox(width: 12),
                               const Expanded(
-                                child: Text('Sheep Pox Vaccine (भेड़ चेचक)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                child: Text('भेड़ चेचक का टीका (Sheep Pox)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('• Kab lagaye: Saal me 1 baar (December - January).\n• Kaise de: 0.5 ml skin me injection.\n• Fayda: Twacha par daane aur fafund/bukhar se bachaav.'),
+                          const Text('• कब लगाएं: साल में 1 बार (दिसंबर से जनवरी के बीच)।\n• कैसे दें: 0.5 मिलीलीटर चमड़ी में टीका लगाएं।\n• फायदा: त्वचा पर होने वाले दानों और बुखार से बचाव।'),
                         ],
                       ),
                     ),
                   ),
 
-                  // 4. Deworming (Pet ke kide)
+                  // 4. Deworming
                   Card(
                     elevation: 3,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                      children: [
                           Row(
                             children: [
                               Container(
@@ -482,18 +482,18 @@ jobs:
                               ),
                               const SizedBox(width: 12),
                               const Expanded(
-                                child: Text('Pet ke Kide ki Dawai (Deworming)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                child: Text('पेट के कीड़े की दवा (Deworming)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('• Kab khilaye: Har 3 mahine me ek baar (Barish se pehle zaroor).\n• Dawai: Albendazole / Ivermectin syrup (Vajan ke hisab se munh se pilaye).\n• Lakshan: Bhed ka dublapana, pashu ka suthra na dikhna.'),
+                          const Text('• कब पिलाएं: हर 3 महीने में एक बार (बरसात शुरू होने से पहले अवश्य)।\n• दवा का नाम: अल्बेन्डाजोल या इवरमेक्टिन सिरप (वजन के हिसाब से मुँह से दें)।\n• लक्षण: भेड़ का दुबला होना, सुस्त रहना और बाल खुरदरे होना।'),
                         ],
                       ),
                     ),
                   ),
 
-                  // 5. Diarrhea / Dast
+                  // 5. Diarrhea
                   Card(
                     elevation: 3,
                     child: Padding(
@@ -510,12 +510,12 @@ jobs:
                               ),
                               const SizedBox(width: 12),
                               const Expanded(
-                                child: Text('Dast aur Pet Kharab (Diarrhea)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                child: Text('दस्त और पेट खराब (Diarrhea)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('• Kab de: Patla gobar karte hi turant.\n• Dawai: Bolus Neblon ya ORS ka ghol paani me mila kar pilaye.\n• Fayda: Sharam me paani ki kami (Dehydration) nahi hoti.'),
+                          const Text('• कब दें: पतला गोबर करते ही तुरंत इलाज शुरू करें।\n• दवा: नेब्लोन बोलस (Neblon) या ओआरएस (ORS) का घोल पानी में मिलाकर पिलाएं।\n• फायदा: शरीर में पानी की कमी (डिहाइड्रेशन) से बचाव होता है।'),
                         ],
                       ),
                     ),
@@ -528,7 +528,7 @@ jobs:
             Widget build(BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text('AI Sheep Tracker & Health Care', style: TextStyle(color: Colors.white)),
+                  title: const Text('एआई भेड़ ट्रैकर एवं स्वास्थ्य देखभाल', style: TextStyle(color: Colors.white)),
                   backgroundColor: Colors.green.shade700,
                   centerTitle: true,
                 ),
@@ -541,8 +541,8 @@ jobs:
                     });
                   },
                   items: const [
-                    BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Sheep Profiles'),
-                    BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Medicine & Guide'),
+                    BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'भेड़ प्रोफाइल'),
+                    BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'स्वास्थ्य गाइड'),
                   ],
                 ),
               );
