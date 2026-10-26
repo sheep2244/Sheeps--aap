@@ -46,13 +46,21 @@ jobs:
             final String id;
             final String name;
             final File photo;
-            final String medicalNotes;
+            final String breed;
+            final String age;
+            final String gender;
+            bool isChecked; // Scan hone par hari tick ke liye
+            bool isMissing; // Gum hone par lal nishan ke liye
 
             SheepModel({
               required this.id,
               required this.name,
               required this.photo,
-              this.medicalNotes = 'Healthy / No medication given',
+              this.breed = 'Marwari (मारवाड़ी)',
+              this.age = '18 Months',
+              this.gender = 'मादा (Female)',
+              this.isChecked = false,
+              this.isMissing = false,
             });
           }
 
@@ -109,53 +117,157 @@ jobs:
               }
             }
 
+            void _toggleStatus(SheepModel sheep, bool? checked, bool? missing) {
+              setState(() {
+                if (checked != null) sheep.isChecked = checked;
+                if (missing != null) sheep.isMissing = missing;
+              });
+            }
+
             void _showSheepDetails(SheepModel sheep) {
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
+                backgroundColor: Colors.transparent,
                 builder: (context) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(sheep.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 10),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(sheep.photo, height: 180, width: double.infinity, fit: BoxFit.cover),
+                  return StatefulBuilder(
+                    builder: (context, setModalState) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
                         ),
-                        const SizedBox(height: 15),
-                        const Text('Sheep Unique QR Code (Scannable Offline):', style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 10),
-                        QrImageView(
-                          data: sheep.id,
-                          version: QrVersions.auto,
-                          size: 140.0,
-                        ),
-                        const SizedBox(height: 15),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                        padding: const EdgeInsets.all(20.0),
+                        child: SingleChildScrollView(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text('💊 Medical & Health History:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-                              const SizedBox(height: 4),
-                              Text(sheep.medicalNotes),
+                              Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade300,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.green.withOpacity(0.2),
+                                      blurRadius: 10,
+                                      spreadRadius: 2,
+                                    )
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Text(
+                                      'sheeps_app Digital ID',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Stack(
+                                      alignment: Alignment.topRight,
+                                      children: [
+                                        ClipOval(
+                                          child: Image.file(
+                                            sheep.photo,
+                                            height: 130,
+                                            width: 130,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        if (sheep.isChecked)
+                                          const CircleAvatar(
+                                            radius: 16,
+                                            backgroundColor: Colors.green,
+                                            child: Icon(Icons.check, color: Colors.white, size: 20),
+                                          ),
+                                        if (sheep.isMissing)
+                                          const CircleAvatar(
+                                            radius: 16,
+                                            backgroundColor: Colors.red,
+                                            child: Icon(Icons.close, color: Colors.white, size: 20),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      sheep.name,
+                                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                                    ),
+                                    const Divider(height: 25),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text('ID: ${sheep.id}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                                            const SizedBox(height: 6),
+                                            Text('नस्ल / Breed: ${sheep.breed}', style: const TextStyle(fontSize: 14)),
+                                            const SizedBox(height: 6),
+                                            Text('उम्र / Age: ${sheep.age}', style: const TextStyle(fontSize: 14)),
+                                          ],
+                                        ),
+                                        QrImageView(
+                                          data: sheep.id,
+                                          version: QrVersions.auto,
+                                          size: 80.0,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 15),
+                                    // Status toggle buttons for checking/missing
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            setModalState(() {
+                                              sheep.isChecked = !sheep.isChecked;
+                                              if (sheep.isChecked) sheep.isMissing = false;
+                                            });
+                                            _toggleStatus(sheep, sheep.isChecked, null);
+                                          },
+                                          icon: Icon(Icons.check_circle, color: sheep.isChecked ? Colors.white : Colors.green),
+                                          label: Text(sheep.isChecked ? 'Verified (मिल गई)' : 'Mark Found'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: sheep.isChecked ? Colors.green : Colors.white,
+                                            foregroundColor: sheep.isChecked ? Colors.white : Colors.green,
+                                          ),
+                                        ),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            setModalState(() {
+                                              sheep.isMissing = !sheep.isMissing;
+                                              if (sheep.isMissing) sheep.isChecked = false;
+                                            });
+                                            _toggleStatus(sheep, null, sheep.isMissing);
+                                          },
+                                          icon: Icon(Icons.warning, color: sheep.isMissing ? Colors.white : Colors.red),
+                                          label: Text(sheep.isMissing ? 'Missing (खोई)' : 'Mark Missing'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: sheep.isMissing ? Colors.red : Colors.white,
+                                            foregroundColor: sheep.isMissing ? Colors.white : Colors.red,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 15),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               );
@@ -199,7 +311,7 @@ jobs:
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Saved Sheep Profiles (Click to view QR & Details):', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text('Saved Sheep Profiles (Green = Found, Red = Missing):', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     sheepList.isEmpty
                         ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('No sheep registered yet.')))
@@ -222,6 +334,27 @@ jobs:
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.file(sheep.photo, width: double.infinity, height: double.infinity, fit: BoxFit.cover),
                                     ),
+                                    // Status Badge on Grid Image
+                                    if (sheep.isChecked)
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                                          child: const Icon(Icons.check, color: Colors.white, size: 14),
+                                        ),
+                                      ),
+                                    if (sheep.isMissing)
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                          child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                        ),
+                                      ),
                                     Positioned(
                                       bottom: 4,
                                       left: 4,
@@ -261,30 +394,6 @@ jobs:
                       subtitle: Text('कब लगाएं: साल में 2 बार (मई-जून और नवंबर-दिसंबर)\nफायदा: मुँह और खुर के छालों से बचाव।'),
                     ),
                   ),
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.vaccines, color: Colors.purple),
-                      title: Text('Sheep Pox Vaccine (भेड़ चेचक)'),
-                      subtitle: Text('कब लगाएं: साल में एक बार (दिसंबर-जनवरी)\nफायदा: त्वचा के दानों और बुखार से सुरक्षा।'),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Text('🩺 Common Diseases & Medicines (बीमारी और दवाइयाँ)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
-                  SizedBox(height: 8),
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.medication, color: Colors.orange),
-                      title: Text('पेट के कीड़े (Worms / Parasites)'),
-                      subtitle: Text('लक्षण: दुबलापन, कमज़ोरी\nदवा: Albendazole या Ivermectin (डॉक्टर की सलाह से)'),
-                    ),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.medication, color: Colors.teal),
-                      title: Text('दस्त और पेट खराब (Diarrhea)'),
-                      subtitle: Text('लक्षण: पतला गोबर, डिहाइड्रेशन\nदवा: Bolus Neblon / ORS घोल'),
-                    ),
-                  ),
                 ],
               );
             }
@@ -306,7 +415,7 @@ jobs:
                     });
                   },
                   items: const [
-                    BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Sheep Profiles & QR'),
+                    BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Sheep Profiles'),
                     BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Medicine & Vaccines'),
                   ],
                 ),
