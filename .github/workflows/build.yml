@@ -33,23 +33,15 @@ jobs:
 
       - name: Create Custom App Icon Image
         run: |
-          # Yahan system build ke dauran aapki bhed wali nayi photo (profile picture) ko logo ke roop me set karega.
           curl -sL "https://images.unsplash.com/photo-1484557052118-f32bd25b45b5?auto=format&fit=crop&w=512&q=80" -o assets/icon/icon.png
 
-      - name: Create pubspec.yaml & Configure Icon
+      - name: Configure App Launcher Icons in pubspec.yaml
         run: |
-          cat << 'EOF' > pubspec_override.yaml
-          dev_dependencies:
-            flutter_test:
-              sdk: flutter
-            flutter_launcher_icons: ^0.13.1
-
-          flutter_launcher_icons:
-            android: "launcher_icon"
-            ios: true
-            image_path: "assets/icon/icon.png"
-          EOF
-          cat pubspec_override.yaml >> pubspec.yaml
+          echo "" >> pubspec.yaml
+          echo "flutter_launcher_icons:" >> pubspec.yaml
+          echo "  android: \"launcher_icon\"" >> pubspec.yaml
+          echo "  ios: true" >> pubspec.yaml
+          echo "  image_path: \"assets/icon/icon.png\"" >> pubspec.yaml
 
       - name: Overwrite main.dart
         run: |
@@ -132,7 +124,7 @@ jobs:
                       id: 'SHEEP_QR_$nextId',
                       name: 'भेड़ #$nextId',
                       photo: File(photo.path),
-                      isChecked: true, // Nayi bhed scanner me ate hi automatically hari tick dega
+                      isChecked: true,
                     ),
                   );
                 });
@@ -424,7 +416,6 @@ jobs:
 
       - name: Generate App Launcher Icons
         run: |
-          # Yahan system app ka icon automatically inject karega
           flutter pub get
           dart run flutter_launcher_icons:generate || true
 
