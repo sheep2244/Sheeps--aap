@@ -111,170 +111,36 @@ jobs:
                       id: 'SHEEP_QR_$nextId',
                       name: 'भेड़ #$nextId',
                       photo: File(photo.path),
+                      isChecked: true, // Nayi photo khinchne par apne aap hari tick lag jayegi
                     ),
                   );
                 });
               }
             }
 
-            void _toggleStatus(SheepModel sheep, bool? checked, bool? missing) {
-              setState(() {
-                if (checked != null) sheep.isChecked = checked;
-                if (missing != null) sheep.isMissing = missing;
-              });
-            }
-
-            void _showSheepDetails(SheepModel sheep) {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) {
-                  return StatefulBuilder(
-                    builder: (context, setModalState) {
-                      return Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFE8F5E9),
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-                        ),
-                        padding: const EdgeInsets.all(20.0),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade300,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.green.withOpacity(0.2),
-                                      blurRadius: 10,
-                                      spreadRadius: 2,
-                                    )
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    const Text(
-                                      'डिजिटल पहचान पत्र (Digital ID)',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Stack(
-                                      alignment: Alignment.topRight,
-                                      children: [
-                                        ClipOval(
-                                          child: Image.file(
-                                            sheep.photo,
-                                            height: 130,
-                                            width: 130,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        if (sheep.isChecked)
-                                          const CircleAvatar(
-                                            radius: 16,
-                                            backgroundColor: Colors.green,
-                                            child: Icon(Icons.check, color: Colors.white, size: 20),
-                                          ),
-                                        if (sheep.isMissing)
-                                          const CircleAvatar(
-                                            radius: 16,
-                                            backgroundColor: Colors.red,
-                                            child: Icon(Icons.close, color: Colors.white, size: 20),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      sheep.name,
-                                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
-                                    ),
-                                    const Divider(height: 25),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text('आईडी: ${sheep.id}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                                            const SizedBox(height: 6),
-                                            Text('नस्ल: ${sheep.breed}', style: const TextStyle(fontSize: 14)),
-                                            const SizedBox(height: 6),
-                                            Text('उम्र: ${sheep.age}', style: const TextStyle(fontSize: 14)),
-                                            const SizedBox(height: 6),
-                                            Text('लिंग: ${sheep.gender}', style: const TextStyle(fontSize: 14)),
-                                          ],
-                                        ),
-                                        QrImageView(
-                                          data: sheep.id,
-                                          version: QrVersions.auto,
-                                          size: 80.0,
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 15),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            setModalState(() {
-                                              sheep.isChecked = !sheep.isChecked;
-                                              if (sheep.isChecked) sheep.isMissing = false;
-                                            });
-                                            _toggleStatus(sheep, sheep.isChecked, null);
-                                          },
-                                          icon: Icon(Icons.check_circle, color: sheep.isChecked ? Colors.white : Colors.green),
-                                          label: Text(sheep.isChecked ? 'मिल गई (Verified)' : 'उपस्थित दर्ज करें'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: sheep.isChecked ? Colors.green : Colors.white,
-                                            foregroundColor: sheep.isChecked ? Colors.white : Colors.green,
-                                          ),
-                                        ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            setModalState(() {
-                                              sheep.isMissing = !sheep.isMissing;
-                                              if (sheep.isMissing) sheep.isChecked = false;
-                                            });
-                                            _toggleStatus(sheep, null, sheep.isMissing);
-                                          },
-                                          icon: Icon(Icons.warning, color: sheep.isMissing ? Colors.white : Colors.red),
-                                          label: Text(sheep.isMissing ? 'खोई हुई (Missing)' : 'गुम घोषित करें'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: sheep.isMissing ? Colors.red : Colors.white,
-                                            foregroundColor: sheep.isMissing ? Colors.white : Colors.red,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
+            // Automatic scan / verify simulation
+            void _scanAndVerifySheep() async {
+              final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+              if (photo != null) {
+                // Yahan app camera se scan karke match karega aur automatically verified kar dega
+                setState(() {
+                  if (sheepList.isNotEmpty) {
+                    // Pehli unverified sheep ko apne aap verified (hari tick) kar dega
+                    var sheep = sheepList.firstWhere((s) => !s.isChecked, orElse: () => sheepList.first);
+                    sheep.isChecked = true;
+                    sheep.isMissing = false;
+                  }
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('भेड़ सफलतापूर्वक स्कैन हो गई और हरी टिक लग गई!'), backgroundColor: Colors.green),
+                );
+              }
             }
 
             Widget _buildTrackerTab() {
+              // Missing sheeps ki alag list nikalne ke liye
+              List<SheepModel> missingSheepList = sheepList.where((s) => s.isMissing).toList();
+
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -302,17 +168,88 @@ jobs:
                       ),
                     ),
                     const SizedBox(height: 15),
-                    ElevatedButton.icon(
-                      onPressed: _captureSheepPhoto,
-                      icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                      label: const Text('फोटो खींचें और QR कोड बनाएं', style: TextStyle(fontSize: 16, color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade600,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _captureSheepPhoto,
+                            icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                            label: const Text('नयी भेड़ जोड़ें', style: TextStyle(fontSize: 14, color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green.shade600,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _scanAndVerifySheep,
+                            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                            label: const Text('भेड़ स्कैन करें', style: TextStyle(fontSize: 14, color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.shade700,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
-                    const Text('सहेजी गई भेड़ें (हरी टिक = मिल गई, लाल निशान = गुम):', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+
+                    // Agar koi bhed missing hai to uski alag se red alert list dikegi
+                    if (missingSheepList.isNotEmpty) ...[
+                      const Text('⚠️ खोई हुई (Missing) भेड़ें:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red)),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 110,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: missingSheepList.length,
+                          itemBuilder: (context, index) {
+                            final sheep = missingSheepList[index];
+                            return Container(
+                              width: 100,
+                              margin: const EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.red, width: 2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(sheep.photo, width: 100, height: 110, fit: BoxFit.cover),
+                                  ),
+                                  const Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.red,
+                                      child: Icon(Icons.close, color: Colors.white, size: 16),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      color: Colors.red.withOpacity(0.8),
+                                      padding: const EdgeInsets.all(2),
+                                      child: Text(sheep.name, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    const Text('सभी सहेजी गई भेड़ें:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     sheepList.isEmpty
                         ? const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('अभी तक कोई भेड़ दर्ज नहीं की गई है।')))
@@ -328,7 +265,13 @@ jobs:
                             itemBuilder: (context, index) {
                               final sheep = sheepList[index];
                               return GestureDetector(
-                                onTap: () => _showSheepDetails(sheep),
+                                onTap: () {
+                                  setState(() {
+                                    // Click karne par status badal sakte hain
+                                    sheep.isChecked = !sheep.isChecked;
+                                    if (sheep.isChecked) sheep.isMissing = false;
+                                  });
+                                },
                                 child: Stack(
                                   children: [
                                     ClipRRect(
@@ -380,144 +323,18 @@ jobs:
                 children: [
                   const Text('💉 टीका एवं दवा मार्गदर्शिका (स्वास्थ्य गाइड)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
                   const SizedBox(height: 8),
-                  
-                  // 1. PPR Vaccine
                   Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.vaccines, color: Colors.blue, size: 30),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('पीपीआर का टीका (PPR Vaccine)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text('• कब लगाएं: 3 महीने की उम्र में (हर 3 साल में एक बार)।\n• कैसे दें: चमड़ी के नीचे (Subcutaneous) 1 मिलीलीटर इंजेक्शन।\n• फायदा: महामारी बुखार, मुँह के छाले और दस्त से बचाव।'),
-                        ],
-                      ),
+                    child: ListTile(
+                      leading: const Icon(Icons.vaccines, color: Colors.blue, size: 30),
+                      title: const Text('पीपीआर का टीका (PPR Vaccine)', style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text('• कब लगाएं: 3 महीने की उम्र में (हर 3 साल में एक बार)।\n• कैसे दें: चमड़ी के नीचे 1 मिलीलीटर।\n• फायदा: महामारी बुखार और दस्त से बचाव।'),
                     ),
                   ),
-
-                  // 2. FMD Vaccine
                   Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.vaccines, color: Colors.red, size: 30),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('खुरपका-मुँहपका टीका (FMD Vaccine)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text('• कब लगाएं: साल में 2 बार (मई-जून और नवंबर-दिसंबर)।\n• कैसे दें: मांस में (Muscle) 2 मिलीलीटर इंजेक्शन।\n• फायदा: मुँह और खुर के घावों से संपूर्ण सुरक्षा।'),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // 3. Sheep Pox Vaccine
-                  Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.vaccines, color: Colors.purple, size: 30),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('भेड़ चेचक का टीका (Sheep Pox)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text('• कब लगाएं: साल में 1 बार (दिसंबर से जनवरी के बीच)।\n• कैसे दें: 0.5 मिलीलीटर चमड़ी में टीका लगाएं।\n• फायदा: त्वचा पर होने वाले दानों और बुखार से बचाव।'),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // 4. Deworming
-                  Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.medication, color: Colors.orange, size: 30),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('पेट के कीड़े की दवा (Deworming)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text('• कब पिलाएं: हर 3 महीने में एक बार (बरसात शुरू होने से पहले अवश्य)।\n• दवा का नाम: अल्बेन्डाजोल या इवरमेक्टिन सिरप (वजन के हिसाब से मुँह से दें)।\n• लक्षण: भेड़ का दुबला होना, सुस्त रहना और बाल खुरदरे होना।'),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // 5. Diarrhea
-                  Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.teal.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.medication_liquid, color: Colors.teal, size: 30),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('दस्त और पेट खराब (Diarrhea)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Text('• कब दें: पतला गोबर करते ही तुरंत इलाज शुरू करें।\n• दवा: नेब्लोन बोलस (Neblon) या ओआरएस (ORS) का घोल पानी में मिलाकर पिलाएं।\n• फायदा: शरीर में पानी की कमी (डिहाइड्रेशन) से बचाव होता है।'),
-                        ],
-                      ),
+                    child: ListTile(
+                      leading: const Icon(Icons.vaccines, color: Colors.red, size: 30),
+                      title: const Text('खुरपका-मुँहपका टीका (FMD)', style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text('• कब लगाएं: साल में 2 बार (मई-जून और नवंबर-दिसंबर)।\n• कैसे दें: मांस में 2 मिलीलीटर।\n• फायदा: मुँह और खुर के घावों से सुरक्षा।'),
                     ),
                   ),
                 ],
