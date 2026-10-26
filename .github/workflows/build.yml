@@ -49,8 +49,8 @@ jobs:
             final String breed;
             final String age;
             final String gender;
-            bool isChecked; // Scan hone par hari tick ke liye
-            bool isMissing; // Gum hone par lal nishan ke liye
+            bool isChecked;
+            bool isMissing;
 
             SheepModel({
               required this.id,
@@ -167,7 +167,7 @@ jobs:
                                 child: Column(
                                   children: [
                                     const Text(
-                                      'sheeps_app Digital ID',
+                                      'sheeps_app Digital ID Card',
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
                                     ),
                                     const SizedBox(height: 12),
@@ -213,6 +213,8 @@ jobs:
                                             Text('नस्ल / Breed: ${sheep.breed}', style: const TextStyle(fontSize: 14)),
                                             const SizedBox(height: 6),
                                             Text('उम्र / Age: ${sheep.age}', style: const TextStyle(fontSize: 14)),
+                                            const SizedBox(height: 6),
+                                            Text('लिंग / Gender: ${sheep.gender}', style: const TextStyle(fontSize: 14)),
                                           ],
                                         ),
                                         QrImageView(
@@ -223,7 +225,6 @@ jobs:
                                       ],
                                     ),
                                     const SizedBox(height: 15),
-                                    // Status toggle buttons for checking/missing
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
@@ -334,7 +335,6 @@ jobs:
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.file(sheep.photo, width: double.infinity, height: double.infinity, fit: BoxFit.cover),
                                     ),
-                                    // Status Badge on Grid Image
                                     if (sheep.isChecked)
                                       Positioned(
                                         top: 4,
@@ -377,21 +377,147 @@ jobs:
             Widget _buildMedicineGuideTab() {
               return ListView(
                 padding: const EdgeInsets.all(16),
-                children: const [
-                  Text('💉 Vaccination Schedule (टीकाकरण समय सारणी)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
-                  SizedBox(height: 8),
+                children: [
+                  const Text('💉 Tika aur Dawai Guide (Visual & Detail)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                  const SizedBox(height: 8),
+                  
+                  // 1. PPR Vaccine
                   Card(
-                    child: ListTile(
-                      leading: Icon(Icons.vaccines, color: Colors.blue),
-                      title: Text('PPR Vaccine (पीपीआर का टीका)'),
-                      subtitle: Text('कब लगाएं: 3 महीने की उम्र में (हर 3 साल में एक बार)\nफायदा: महामारी बुखार और दस्त से बचाव।'),
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.vaccines, color: Colors.blue, size: 30),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text('PPR Vaccine (पीपीआर का टीका)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text('• Kab lagaye: 3 mahine ki umra me (har 3 saal me ek baar).\n• Kaise de: Skin ke niche subcutaneous injection (1 ml).\n• Fayda: Mahamari bukhar, muh ke chaale aur dast se bachaav.'),
+                        ],
+                      ),
                     ),
                   ),
+
+                  // 2. FMD Vaccine
                   Card(
-                    child: ListTile(
-                      leading: Icon(Icons.vaccines, color: Colors.red),
-                      title: Text('FMD Vaccine (खुरपका-मुँहपका)'),
-                      subtitle: Text('कब लगाएं: साल में 2 बार (मई-जून और नवंबर-दिसंबर)\nफायदा: मुँह और खुर के छालों से बचाव।'),
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.vaccines, color: Colors.red, size: 30),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text('FMD Vaccine (खुरपका-मुँहपका)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text('• Kab lagaye: Saal me 2 baar (May-June aur Nov-Dec).\n• Kaise de: Muscle me injection (2 ml).\n• Fayda: Muh aur khur ke zakhmo se suraksha.'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 3. Sheep Pox Vaccine
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.vaccines, color: Colors.purple, size: 30),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text('Sheep Pox Vaccine (भेड़ चेचक)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text('• Kab lagaye: Saal me 1 baar (December - January).\n• Kaise de: 0.5 ml skin me injection.\n• Fayda: Twacha par daane aur fafund/bukhar se bachaav.'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 4. Deworming (Pet ke kide)
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.medication, color: Colors.orange, size: 30),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text('Pet ke Kide ki Dawai (Deworming)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text('• Kab khilaye: Har 3 mahine me ek baar (Barish se pehle zaroor).\n• Dawai: Albendazole / Ivermectin syrup (Vajan ke hisab se munh se pilaye).\n• Lakshan: Bhed ka dublapana, pashu ka suthra na dikhna.'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 5. Diarrhea / Dast
+                  Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.teal.shade50, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.medication_liquid, color: Colors.teal, size: 30),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text('Dast aur Pet Kharab (Diarrhea)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text('• Kab de: Patla gobar karte hi turant.\n• Dawai: Bolus Neblon ya ORS ka ghol paani me mila kar pilaye.\n• Fayda: Sharam me paani ki kami (Dehydration) nahi hoti.'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -416,7 +542,7 @@ jobs:
                   },
                   items: const [
                     BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Sheep Profiles'),
-                    BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Medicine & Vaccines'),
+                    BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: 'Medicine & Guide'),
                   ],
                 ),
               );
