@@ -26,390 +26,211 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
 
-      - name: Add Dependencies
-        run: |
-          flutter pub add image_picker qr_flutter
-
       - name: Overwrite main.dart
         run: |
           cat << 'EOF' > lib/main.dart
-          import 'dart:io';
           import 'package:flutter/material.dart';
-          import 'package:image_picker/image_picker.dart';
-          import 'package:qr_flutter/qr_flutter.dart';
 
           void main() {
             runApp(const SheepsApp());
           }
 
-          class SheepModel {
-            final String id;
-            final String name;
-            final File photo;
-            final String medicalNotes;
-
-            SheepModel({
-              required this.id,
-              required this.name,
-              required this.photo,
-              this.medicalNotes = 'Healthy / Swasth (No medication required)',
-            });
-          }
-
-          class SheepsApp extends StatefulWidget {
+          class SheepsApp extends StatelessWidget {
             const SheepsApp({super.key});
-
-            @override
-            State<SheepsApp> createState() => _SheepsAppState();
-          }
-
-          class _SheepsAppState extends State<SheepsApp> {
-            bool isHindi = true;
 
             @override
             Widget build(BuildContext context) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'AI Sheep Tracker & Health Care',
+                title: 'AI Sheep Tracker',
                 theme: ThemeData(
                   primarySwatch: Colors.green,
                   useMaterial3: true,
                 ),
-                home: SheepDashboard(
-                  isHindi: isHindi,
-                  onToggleLanguage: () {
-                    setState(() {
-                      isHindi = !isHindi;
-                    });
-                  },
-                ),
+                home: const SheepHome(),
               );
             }
           }
 
-          class SheepDashboard extends StatefulWidget {
-            final bool isHindi;
-            final VoidCallback onToggleLanguage;
-
-            const SheepDashboard({
-              super.key,
-              required this.isHindi,
-              required this.onToggleLanguage,
-            });
+          class SheepHome extends StatefulWidget {
+            const SheepHome({super.key});
 
             @override
-            State<SheepDashboard> createState() => _SheepDashboardState();
+            State<SheepHome> createState() => _SheepHomeState();
           }
 
-          class _SheepDashboardState extends State<SheepDashboard> {
-            final List<SheepModel> sheepList = [];
-            final int maxLimit = 300;
-            final ImagePicker _picker = ImagePicker();
+          class _SheepHomeState extends State<SheepHome> {
+            bool isHindi = true;
+            int sheepCount = 0;
             int selectedTab = 0;
-
-            Future<void> _captureSheepPhoto() async {
-              if (sheepList.length >= maxLimit) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      widget.isHindi
-                          ? 'अधिकतम 300 भेड़ों की सीमा पूरी हो गई है!'
-                          : 'Maximum limit of 300 sheeps reached!',
-                    ),
-                  ),
-                );
-                return;
-              }
-
-              final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-              if (photo != null) {
-                int nextId = sheepList.length + 1;
-                setState(() {
-                  sheepList.add(
-                    SheepModel(
-                      id: 'SHEEP_QR_$nextId',
-                      name: widget.isHindi ? 'भेड़ #$nextId' : 'Sheep #$nextId',
-                      photo: File(photo.path),
-                    ),
-                  );
-                });
-              }
-            }
-
-            void _showSheepDetails(SheepModel sheep) {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(sheep.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 10),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(sheep.photo, height: 180, width: double.infinity, fit: BoxFit.cover),
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          widget.isHindi
-                              ? 'भेड़ का यूनिक QR कोड (ऑफ़लाइन स्कैन योग्य):'
-                              : 'Sheep Unique QR Code (Scannable Offline):',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        QrImageView(
-                          data: sheep.id,
-                          version: QrVersions.auto,
-                          size: 140.0,
-                        ),
-                        const SizedBox(height: 15),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.isHindi
-                                    ? '💊 स्वास्थ्य एवं इलाज विवरण:'
-                                    : '💊 Medical & Health History:',
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(sheep.medicalNotes),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }
-
-            Widget _buildTrackerTab() {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Card(
-                      elevation: 4,
-                      color: Colors.green.shade50,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.isHindi
-                                      ? 'कुल दर्ज भेड़ें (अधिकतम: 300)'
-                                      : 'Total Registered Sheeps (Max: 300)',
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                Text(
-                                  '${sheepList.length} / $maxLimit',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Icon(Icons.pets, size: 44, color: Colors.green.shade700),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    ElevatedButton.icon(
-                      onPressed: _captureSheepPhoto,
-                      icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                      label: Text(
-                        widget.isHindi ? 'फोटो खींचें और QR कोड बनाएं' : 'Take Photo & Generate QR Code',
-                        style: const TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade600,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      widget.isHindi
-                          ? 'सेव की गई भेड़ें (QR और विवरण के लिए टैप करें):'
-                          : 'Saved Sheep Profiles (Tap to view QR & Details):',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    sheepList.isEmpty
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Text(
-                                widget.isHindi
-                                    ? 'अभी तक कोई भेड़ दर्ज नहीं की गई है।'
-                                    : 'No sheep registered yet.',
-                              ),
-                            ),
-                          )
-                        : GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
-                            itemCount: sheepList.length,
-                            itemBuilder: (context, index) {
-                              final sheep = sheepList[index];
-                              return GestureDetector(
-                                onTap: () => _showSheepDetails(sheep),
-                                child: Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(
-                                        sheep.photo,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 4,
-                                      left: 4,
-                                      child: Container(
-                                        color: Colors.black70,
-                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                        child: Text(
-                                          sheep.name,
-                                          style: const TextStyle(color: Colors.white, fontSize: 11),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                  ],
-                ),
-              );
-            }
-
-            Widget _buildMedicineGuideTab() {
-              return ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  Text(
-                    widget.isHindi ? '💉 टीकाकरण समय सारणी' : '💉 Vaccination Schedule',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
-                  ),
-                  const SizedBox(height: 8),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.vaccines, color: Colors.blue),
-                      title: Text(widget.isHindi ? 'पीपीआर टीका (PPR Vaccine)' : 'PPR Vaccine'),
-                      subtitle: Text(
-                        widget.isHindi
-                            ? 'कब लगाएं: 3 महीने की उम्र में (हर 3 साल में एक बार)\nफायदा: महामारी बुखार और दस्त से बचाव।'
-                            : 'Timing: At 3 months age (Once every 3 years)\nBenefit: Prevents epidemic fever and diarrhea.',
-                      ),
-                    ),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.vaccines, color: Colors.red),
-                      title: Text(widget.isHindi ? 'खुरपका-मुँहपका टीका (FMD)' : 'FMD Vaccine'),
-                      subtitle: Text(
-                        widget.isHindi
-                            ? 'कब लगाएं: साल में 2 बार (मई-जून और नवंबर-दिसंबर)\nफायदा: मुँह और खुर के छालों से बचाव।'
-                            : 'Timing: Twice a year (May-June & Nov-Dec)\nBenefit: Prevents mouth & foot blisters.',
-                      ),
-                    ),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.vaccines, color: Colors.purple),
-                      title: Text(widget.isHindi ? 'भेड़ चेचक टीका (Sheep Pox)' : 'Sheep Pox Vaccine'),
-                      subtitle: Text(
-                        widget.isHindi
-                            ? 'कब लगाएं: साल में एक बार (दिसंबर-जनवरी)\nफायदा: त्वचा के दानों और बुखार से सुरक्षा।'
-                            : 'Timing: Once a year (Dec-Jan)\nBenefit: Prevents skin lesions and fever.',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    widget.isHindi ? '🩺 सामान्य बीमारियां और दवाइयां' : '🩺 Common Diseases & Medicines',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
-                  ),
-                  const SizedBox(height: 8),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.medication, color: Colors.orange),
-                      title: Text(widget.isHindi ? 'पेट के कीड़े (Worms / Parasites)' : 'Intestinal Worms'),
-                      subtitle: Text(
-                        widget.isHindi
-                            ? 'लक्षण: दुबलापन, कमज़ोरी\nदवा: Albendazole या Ivermectin'
-                            : 'Symptoms: Weakness, weight loss\nMedicine: Albendazole or Ivermectin',
-                      ),
-                    ),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.medication, color: Colors.teal),
-                      title: Text(widget.isHindi ? 'दस्त और पेट खराब (Diarrhea)' : 'Diarrhea'),
-                      subtitle: Text(
-                        widget.isHindi
-                            ? 'लक्षण: पतला गोबर, डिहाइड्रेशन\nदवा: Bolus Neblon / ORS घोल'
-                            : 'Symptoms: Loose stool, dehydration\nMedicine: Bolus Neblon / ORS Solution',
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
 
             @override
             Widget build(BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
                   title: Text(
-                    widget.isHindi ? 'भेड़ ट्रैकिंग एवं पशु स्वास्थ्य' : 'AI Sheep Tracker & Health Care',
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                    isHindi ? 'भेड़ ट्रैकिंग एवं पशु स्वास्थ्य' : 'AI Sheep Tracker & Health Care',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
                   backgroundColor: Colors.green.shade700,
                   actions: [
                     TextButton.icon(
-                      onPressed: widget.onToggleLanguage,
+                      onPressed: () {
+                        setState(() {
+                          isHindi = !isHindi;
+                        });
+                      },
                       icon: const Icon(Icons.language, color: Colors.white),
                       label: Text(
-                        widget.isHindi ? 'EN' : 'हिंदी',
+                        isHindi ? 'EN' : 'हिंदी',
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
-                body: selectedTab == 0 ? _buildTrackerTab() : _buildMedicineGuideTab(),
+                body: selectedTab == 0
+                    ? SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Card(
+                              elevation: 4,
+                              color: Colors.green.shade50,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          isHindi ? 'कुल दर्ज भेड़ें (अधिकतम: 300)' : 'Total Sheeps (Max: 300)',
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          '$sheepCount / 300',
+                                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green.shade800),
+                                        ),
+                                      ],
+                                    ),
+                                    Icon(Icons.pets, size: 40, color: Colors.green.shade700),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                if (sheepCount < 300) {
+                                  setState(() {
+                                    sheepCount++;
+                                  });
+                                }
+                              },
+                              icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                              label: Text(
+                                isHindi ? 'फोटो खींचें और QR कोड बनाएं' : 'Take Photo & Generate QR',
+                                style: const TextStyle(color: Colors.white, fontSize: 16),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade600,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              isHindi ? 'सेव की गई भेड़ें:' : 'Saved Sheeps Profile:',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10),
+                            sheepCount == 0
+                                ? Padding(
+                                    padding: const EdgeInsets.all(30.0),
+                                    center: true,
+                                    child: Text(
+                                      isHindi ? 'अभी तक कोई भेड़ दर्ज नहीं हुई है।' : 'No sheep added yet.',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : GridView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                    ),
+                                    itemCount: sheepCount,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.shade100,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(Icons.pets, color: Colors.green),
+                                            const SizedBox(height: 4),
+                                            Text('#${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ],
+                        ),
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          Text(
+                            isHindi ? '💉 टीकाकरण समय सारणी' : '💉 Vaccination Schedule',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                          ),
+                          const SizedBox(height: 8),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.vaccines, color: Colors.blue),
+                              title: Text(isHindi ? 'पीपीआर टीका (PPR Vaccine)' : 'PPR Vaccine'),
+                              subtitle: Text(
+                                isHindi
+                                    ? 'कब लगाएं: 3 महीने की उम्र में\nफायदा: महामारी बुखार और दस्त से बचाव।'
+                                    : 'At 3 months age. Prevents fever & diarrhea.',
+                              ),
+                            ),
+                          ),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.vaccines, color: Colors.red),
+                              title: Text(isHindi ? 'खुरपका-मुँहपका टीका (FMD)' : 'FMD Vaccine'),
+                              subtitle: Text(
+                                isHindi
+                                    ? 'कब लगाएं: साल में 2 बार\nफायदा: मुँह और खुर के छालों से बचाव।'
+                                    : 'Twice a year. Prevents mouth/foot blisters.',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            isHindi ? '🩺 सामान्य बीमारियां और दवाइयां' : '🩺 Common Diseases & Medicines',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                          ),
+                          const SizedBox(height: 8),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.medication, color: Colors.orange),
+                              title: Text(isHindi ? 'पेट के कीड़े (Worms)' : 'Intestinal Worms'),
+                              subtitle: Text(
+                                isHindi ? 'दवा: Albendazole या Ivermectin' : 'Medicine: Albendazole / Ivermectin',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                 bottomNavigationBar: BottomNavigationBar(
                   currentIndex: selectedTab,
                   onTap: (index) {
@@ -420,11 +241,11 @@ jobs:
                   items: [
                     BottomNavigationBarItem(
                       icon: const Icon(Icons.pets),
-                      label: widget.isHindi ? 'भेड़ प्रोफाइल और QR' : 'Sheep & QR',
+                      label: isHindi ? 'भेड़ प्रोफाइल' : 'Sheep Profile',
                     ),
                     BottomNavigationBarItem(
                       icon: const Icon(Icons.medical_services),
-                      label: widget.isHindi ? 'दवा व टीके' : 'Medicine & Vaccines',
+                      label: isHindi ? 'दवा व टीके' : 'Medicine & Vaccines',
                     ),
                   ],
                 ),
