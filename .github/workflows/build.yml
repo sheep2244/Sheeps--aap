@@ -28,20 +28,20 @@ jobs:
 
       - name: Add Dependencies & Create Directories
         run: |
-          flutter pub add image_picker qr_flutter flutter_launcher_icons --dev
-          mkdir -p assets/icon
+          flutter pub add image_picker qr_flutter --dev
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
 
-      - name: Set Custom Sheep App Icon
+      - name: Download Sheep App Icon for Android
         run: |
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=512&q=80" -o assets/icon/icon.png
-
-      - name: Configure App Launcher Icons in pubspec.yaml
-        run: |
-          echo "" >> pubspec.yaml
-          echo "flutter_launcher_icons:" >> pubspec.yaml
-          echo "  android: \"launcher_icon\"" >> pubspec.yaml
-          echo "  ios: true" >> pubspec.yaml
-          echo "  image_path: \"assets/icon/icon.png\"" >> pubspec.yaml
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
       - name: Overwrite main.dart
         run: |
@@ -211,7 +211,6 @@ jobs:
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Professional App Header Banner Card
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -607,11 +606,6 @@ jobs:
             }
           }
           EOF
-
-      - name: Generate App Launcher Icons
-        run: |
-          flutter pub get
-          dart run flutter_launcher_icons:generate || true
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew || true
