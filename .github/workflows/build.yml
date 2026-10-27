@@ -138,7 +138,6 @@ jobs:
               }
             }
 
-            // Fully Automatic AI Scan & Status Update Logic
             void _autoScanAndVerify() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
@@ -169,34 +168,29 @@ jobs:
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('All herd data and summary at your hands', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.qr_code_scanner, color: Colors.blue),
-                                  onPressed: _autoScanAndVerify,
-                                  tooltip: 'Auto Scan',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.add_a_photo, color: Colors.green),
-                                  onPressed: _addNewSheep,
-                                  tooltip: 'Add Sheep',
-                                ),
-                              ],
-                            ),
-                          ],
+                    // Prominent Camera & Scan Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _addNewSheep,
+                            icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                            label: const Text('नयी भेड़ जोड़ें', style: TextStyle(color: Colors.white)),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, padding: const EdgeInsets.symmetric(vertical: 12)),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _autoScanAndVerify,
+                            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                            label: const Text('AI Auto Scan', style: TextStyle(color: Colors.white)),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, padding: const EdgeInsets.symmetric(vertical: 12)),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
 
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -254,41 +248,6 @@ jobs:
                         ],
                       ),
                     ),
-                    const SizedBox(height: 15),
-
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 5)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Incomes / Expenses', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: const [
-                                  Text('Incomes', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                                  Text('₹ 0.00', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              Container(height: 30, width: 1, color: Colors.grey),
-                              Column(
-                                children: const [
-                                  Text('Expenses', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                  Text('₹ 0.00', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               );
@@ -333,66 +292,81 @@ jobs:
             }
 
             Widget _buildCattleTab() {
-              return sheepList.isEmpty
-                  ? const Center(child: Text('कोई भेड़ दर्ज नहीं है। ऊपर दिए गए कैमरे से जोड़ें।'))
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 0.8,
-                      ),
-                      itemCount: sheepList.length,
-                      itemBuilder: (context, index) {
-                        final sheep = sheepList[index];
-                        return Card(
-                          elevation: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: Stack(
-                                  children: [
-                                    Image.file(sheep.photo, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                                    if (sheep.isChecked)
-                                      const Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: CircleAvatar(
-                                          radius: 12,
-                                          backgroundColor: Colors.green,
-                                          child: Icon(Icons.check, color: Colors.white, size: 16),
-                                        ),
-                                      ),
-                                    if (sheep.isMissing)
-                                      const Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: CircleAvatar(
-                                          radius: 12,
-                                          backgroundColor: Colors.red,
-                                          child: Icon(Icons.close, color: Colors.white, size: 16),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton.icon(
+                      onPressed: _addNewSheep,
+                      icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                      label: const Text('नयी भेड़ की फोटो खींचें', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, minimumSize: const Size(double.infinity, 45)),
+                    ),
+                  ),
+                  Expanded(
+                    child: sheepList.isEmpty
+                        ? const Center(child: Text('कोई भेड़ दर्ज नहीं है।'))
+                        : GridView.builder(
+                            padding: const EdgeInsets.all(12),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 0.8,
+                            ),
+                            itemCount: sheepList.length,
+                            itemBuilder: (context, index) {
+                              final sheep = sheepList[index];
+                              return Card(
+                                elevation: 3,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    Text(sheep.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    Text('ID: ${sheep.id}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                    Expanded(
+                                      child: Stack(
+                                        children: [
+                                          Image.file(sheep.photo, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                                          if (sheep.isChecked)
+                                            const Positioned(
+                                              top: 8,
+                                              right: 8,
+                                              child: CircleAvatar(
+                                                radius: 12,
+                                                backgroundColor: Colors.green,
+                                                child: Icon(Icons.check, color: Colors.white, size: 16),
+                                              ),
+                                            ),
+                                          if (sheep.isMissing)
+                                            const Positioned(
+                                              top: 8,
+                                              right: 8,
+                                              child: CircleAvatar(
+                                                radius: 12,
+                                                backgroundColor: Colors.red,
+                                                child: Icon(Icons.close, color: Colors.white, size: 16),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(sheep.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          Text('ID: ${sheep.id}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        );
-                      },
-                    );
+                  ),
+                ],
+              );
             }
 
             Widget _buildNotificationsTab() {
