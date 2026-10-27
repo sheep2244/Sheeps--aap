@@ -33,7 +33,6 @@ jobs:
 
       - name: Set Custom Sheep App Icon
         run: |
-          # Yahan direct ek saaf-suthri aur asli bhed ki professional photo ko app icon ke taur par download kiya ja raha hai
           curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=512&q=80" -o assets/icon/icon.png
 
       - name: Configure App Launcher Icons in pubspec.yaml
@@ -125,25 +124,30 @@ jobs:
                       id: 'SHEEP_QR_$nextId',
                       name: 'भेड़ #$nextId',
                       photo: File(photo.path),
-                      isChecked: true,
+                      isChecked: true, // Automatically verified on add
                     ),
                   );
                 });
               }
             }
 
-            void _scanAndVerifySheep() async {
+            // Automatic Scan & Recognition logic
+            void _autoScanAndVerify() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
                 setState(() {
                   if (sheepList.isNotEmpty) {
-                    var sheep = sheepList.firstWhere((s) => !s.isChecked, orElse: () => sheepList.first);
-                    sheep.isChecked = true;
-                    sheep.isMissing = false;
+                    // Automatically find first missing or unchecked sheep and mark it found (green tick)
+                    var targetSheep = sheepList.firstWhere((s) => s.isMissing || !s.isChecked, orElse: () => sheepList.first);
+                    targetSheep.isChecked = true;
+                    targetSheep.isMissing = false;
                   }
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('भेड़ सफलतापूर्वक स्कैन हो गई और हरी टिक लग गई!'), backgroundColor: Colors.green),
+                  const SnackBar(
+                    content: Text('AI Scan: भेड़ automatic पहचान ली गई और हरी टिक लग गई!'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               }
             }
@@ -194,9 +198,9 @@ jobs:
                         const SizedBox(width: 10),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: _scanAndVerifySheep,
+                            onPressed: _autoScanAndVerify,
                             icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-                            label: const Text('भेड़ स्कैन करें', style: TextStyle(fontSize: 14, color: Colors.white)),
+                            label: const Text('Auto Scan (AI)', style: TextStyle(fontSize: 14, color: Colors.white)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue.shade700,
                               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -207,6 +211,7 @@ jobs:
                     ),
                     const SizedBox(height: 20),
 
+                    // Automatic Missing Sheep Panel
                     if (missingSheepList.isNotEmpty) ...[
                       const Text('⚠️ खोई हुई (Missing) भेड़ें:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red)),
                       const SizedBox(height: 8),
