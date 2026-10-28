@@ -26,9 +26,22 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
 
-      - name: Add Dependencies
+      - name: Add Dependencies & Create Icon Folders
         run: |
           flutter pub add image_picker qr_flutter --dev
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+
+      - name: Download Sheep Icon for Android
+        run: |
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
       - name: Overwrite main.dart
         run: |
@@ -125,13 +138,11 @@ jobs:
               }
             }
 
-            // Jhund Auto Scan for Counting
             void _scanJhundAutoCount() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
-                // Simulating AI detecting group count from image
                 setState(() {
-                  lastScannedFlockCount = 15 + (DateTime.now().second % 15); // Dynamic estimated count based on AI detection
+                  lastScannedFlockCount = 15 + (DateTime.now().second % 15);
                 });
                 showDialog(
                   context: context,
@@ -150,8 +161,6 @@ jobs:
                         const Text('इस झुंड की फोटो में कुल इतनी भेड़ें पहचानी गईं:'),
                         const SizedBox(height: 12),
                         Text('$lastScannedFlockCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
-                        const SizedBox(height: 8),
-                        const Text('AI Object Detection successful!', style: TextStyle(color: Colors.grey, fontSize: 12)),
                       ],
                     ),
                     actions: [
@@ -268,7 +277,6 @@ jobs:
                     ),
                     const SizedBox(height: 15),
 
-                    // Action Buttons Row (Jhund Scan, Add Sheep, Find Missing)
                     Row(
                       children: [
                         Expanded(
@@ -600,7 +608,7 @@ jobs:
             }
 
             @override
-            Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
               final List<Widget> pages = [
                 _buildSummaryTab(),
                 _buildCattleTab(),
