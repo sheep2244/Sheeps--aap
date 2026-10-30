@@ -26,22 +26,9 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
 
-      - name: Add Dependencies & Create Icon Folders
+      - name: Add Dependencies
         run: |
           flutter pub add image_picker
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          mkdir -p android/app/src/main/res/mipmap-mdpi
-          mkdir -p android/app/src/main/res/mipmap-xhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-
-      - name: Download Professional App Icon
-        run: |
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
       - name: Overwrite main.dart
         run: |
