@@ -26,22 +26,9 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name sheeps_app
 
-      - name: Add Dependencies & Create Icon Folders
+      - name: Add Dependencies
         run: |
-          flutter pub add image_picker qr_flutter --dev
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          mkdir -p android/app/src/main/res/mipmap-mdpi
-          mkdir -p android/app/src/main/res/mipmap-xhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-
-      - name: Download Sheep Icon for Android
-        run: |
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-          curl -sL "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=192&q=80" -o android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          flutter pub add image_picker
 
       - name: Overwrite main.dart
         run: |
@@ -52,32 +39,6 @@ jobs:
 
           void main() {
             runApp(const SheepsApp());
-          }
-
-          class SheepModel {
-            final String id;
-            final String name;
-            File photo;
-            final String breed;
-            final String age;
-            final String gender;
-            bool isChecked;
-            bool isMissing;
-            bool isSick;
-            bool isPregnant;
-
-            SheepModel({
-              required this.id,
-              required this.name,
-              required this.photo,
-              this.breed = 'Marwari',
-              this.age = '18 Mahine',
-              this.gender = 'Mada (Female)',
-              this.isChecked = true,
-              this.isMissing = false,
-              this.isSick = false,
-              this.isPregnant = false,
-            });
           }
 
           class SheepsApp extends StatelessWidget {
@@ -105,32 +66,14 @@ jobs:
           }
 
           class _DashboardScreenState extends State<DashboardScreen> {
-            int _currentIndex = 0;
-            final List<SheepModel> sheepList = [];
+            final List<String> sheepList = [];
             final ImagePicker _picker = ImagePicker();
-            final int maxLimit = 300;
-            int lastScannedFlockCount = 0;
 
             Future<void> _addNewSheep() async {
-              if (sheepList.length >= maxLimit) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Adhiktam 300 bhedo ki sima poori ho chuki hai!')),
-                );
-                return;
-              }
-
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
-                int nextId = sheepList.length + 1;
                 setState(() {
-                  sheepList.add(
-                    SheepModel(
-                      id: 'SHEEP_$nextId',
-                      name: 'Bhed #$nextId',
-                      photo: File(photo.path),
-                      isChecked: true,
-                    ),
-                  );
+                  sheepList.add(photo.path);
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Nayi bhed jodi gayi! Kul sankhya: ${sheepList.length}'), backgroundColor: Colors.green),
@@ -138,208 +81,49 @@ jobs:
               }
             }
 
-            void _scanJhundAutoCount() async {
-              final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-              if (photo != null) {
-                setState(() {
-                  lastScannedFlockCount = 15 + (DateTime.now().second % 15);
-                });
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    title: Row(
-                      children: const [
-                        Icon(Icons.pets, color: Colors.teal, size: 28),
-                        SizedBox(width: 8),
-                        Text('Jhund Scan Complete', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Is jhund ki photo me kul itni bhedein pehchani gayi:'),
-                        const SizedBox(height: 12),
-                        Text('$lastScannedFlockCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
-                      ],
-                    ),
-                    actions: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Thik Hai', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            }
-
-            Widget _buildSummaryTab() {
-              int totalSheep = sheepList.length;
-              int missingCount = sheepList.where((s) => s.isMissing).length;
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [Colors.teal.shade800, Colors.teal.shade500]),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        children: const [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.pets, size: 32, color: Colors.teal),
-                          ),
-                          SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('AI Sheep Master Pro', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                                SizedBox(height: 4),
-                                Text('Smart Herd & Livestock Manager', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _scanJhundAutoCount,
-                            icon: const Icon(Icons.camera, color: Colors.white),
-                            label: const Text('Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _addNewSheep,
-                            icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                            label: const Text('Nayi Bhed', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 5)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Number of Sheep (Auto Counting)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Kul Bhedein: $totalSheep / $maxLimit', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.teal)),
-                              const Icon(Icons.pets, color: Colors.teal),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            Widget _buildCattleTab() {
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: ElevatedButton.icon(
-                      onPressed: _addNewSheep,
-                      icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                      label: const Text('Nayi Bhed Jodein', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, minimumSize: const Size(double.infinity, 45)),
-                    ),
-                  ),
-                  Expanded(
-                    child: sheepList.isEmpty
-                        ? const Center(child: Text('Abhi tak koi bhed darj nahi ki gayi hai.'))
-                        : GridView.builder(
-                            padding: const EdgeInsets.all(12),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              childAspectRatio: 0.8,
-                            ),
-                            itemCount: sheepList.length,
-                            itemBuilder: (context, index) {
-                              final sheep = sheepList[index];
-                              return Card(
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                                        child: Image.file(sheep.photo, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(sheep.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            }
-
             @override
             Widget build(BuildContext context) {
-              final List<Widget> pages = [
-                _buildSummaryTab(),
-                _buildCattleTab(),
-              ];
-
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('AI Sheep Master', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   backgroundColor: Colors.teal.shade700,
                   centerTitle: true,
                 ),
-                body: pages[_currentIndex],
-                bottomNavigationBar: BottomNavigationBar(
-                  currentIndex: _currentIndex,
-                  type: BottomNavigationBarType.fixed,
-                  selectedItemColor: Colors.teal.shade700,
-                  unselectedItemColor: Colors.grey,
-                  onTap: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  items: const [
-                    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Summary'),
-                    BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Cattle'),
+                body: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ElevatedButton.icon(
+                        onPressed: _addNewSheep,
+                        icon: const Icon(Icons.camera_alt, color: Colors.white),
+                        label: const Text('Nayi Bhed Jodein', style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: sheepList.isEmpty
+                          ? const Center(child: Text('Abhi tak koi bhed darj nahi ki gayi hai.', style: TextStyle(fontSize: 16)))
+                          : ListView.builder(
+                              itemCount: sheepList.length,
+                              itemBuilder: (context, index) {
+                                return Card(
+                                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  child: ListTile(
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.file(File(sheepList[index]), width: 50, height: 50, fit: BoxFit.cover),
+                                    ),
+                                    title: Text('Bhed #${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    subtitle: const Text('Marwari Breed - Verified'),
+                                    trailing: const Icon(Icons.check_circle, color: Colors.green),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
                   ],
                 ),
               );
