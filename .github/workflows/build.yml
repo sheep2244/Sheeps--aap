@@ -70,9 +70,9 @@ jobs:
               required this.id,
               required this.name,
               required this.photo,
-              this.breed = 'मारवाड़ी (Marwari)',
-              this.age = '18 महीने',
-              this.gender = 'मादा (Female)',
+              this.breed = 'Marwari',
+              this.age = '18 Mahine',
+              this.gender = 'Mada (Female)',
               this.isChecked = true,
               this.isMissing = false,
               this.isSick = false,
@@ -114,7 +114,7 @@ jobs:
             Future<void> _addNewSheep() async {
               if (sheepList.length >= maxLimit) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('अधिकतम 300 भेड़ों की सीमा पूरी हो चुकी है!')),
+                  const SnackBar(content: Text('Adhiktam 300 bhedo ki sima poori ho chuki hai!')),
                 );
                 return;
               }
@@ -125,15 +125,15 @@ jobs:
                 setState(() {
                   sheepList.add(
                     SheepModel(
-                      id: 'SHEEP_QR_$nextId',
-                      name: 'भेड़ #$nextId',
+                      id: 'SHEEP_$nextId',
+                      name: 'Bhed #$nextId',
                       photo: File(photo.path),
                       isChecked: true,
                     ),
                   );
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('नयी भेड़ जोड़ी गई! कुल संख्या: ${sheepList.length}'), backgroundColor: Colors.green),
+                  SnackBar(content: Text('Nayi bhed jodi gayi! Kul sankhya: ${sheepList.length}'), backgroundColor: Colors.green),
                 );
               }
             }
@@ -158,7 +158,7 @@ jobs:
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('इस झुंड की फोटो में कुल इतनी भेड़ें पहचानी गईं:'),
+                        const Text('Is jhund ki photo me kul itni bhedein pehchani gayi:'),
                         const SizedBox(height: 12),
                         Text('$lastScannedFlockCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
                       ],
@@ -168,69 +168,6 @@ jobs:
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
                         onPressed: () => Navigator.pop(context),
                         child: const Text('Thik Hai', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            }
-
-            void _scanOtherFlockForMissingSheep() async {
-              final List<SheepModel> missingSheep = sheepList.where((s) => s.isMissing).toList();
-
-              if (missingSheep.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('आपकी कोई भी भेड़ गुम (Missing) नहीं दर्ज है।'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-                return;
-              }
-
-              final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-              if (photo != null) {
-                SheepModel matchedSheep = missingSheep.first;
-
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    title: Row(
-                      children: const [
-                        Icon(Icons.check_circle, color: Colors.green, size: 28),
-                        SizedBox(width: 8),
-                        Text('MATCH FOUND!', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('इस झुंड में आपकी गुम हुई भेड़ मिल गई है!'),
-                        const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.file(matchedSheep.photo, height: 130, width: 130, fit: BoxFit.cover),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(matchedSheep.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text('ID: ${matchedSheep.id}', style: const TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                    actions: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        onPressed: () {
-                          setState(() {
-                            matchedSheep.isMissing = false;
-                            matchedSheep.isChecked = true;
-                          });
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('भेड़ आपकी लिस्ट में वापस Verified हो गई!'), backgroundColor: Colors.green),
-                          );
-                        },
-                        child: const Text('Wapas Verified Karein', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -252,20 +189,19 @@ jobs:
                       decoration: BoxDecoration(
                         gradient: LinearGradient(colors: [Colors.teal.shade800, Colors.teal.shade500]),
                         borderRadius: BorderRadius.circular(15),
-                        boxShadow: [BoxShadow(color: Colors.grey.shade400, blurRadius: 6, offset: const Offset(0, 3))],
                       ),
                       child: Row(
-                        children: [
-                          const CircleAvatar(
+                        children: const [
+                          CircleAvatar(
                             radius: 30,
                             backgroundColor: Colors.white,
                             child: Icon(Icons.pets, size: 32, color: Colors.teal),
                           ),
-                          const SizedBox(width: 15),
+                          SizedBox(width: 15),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
+                              children: [
                                 Text('AI Sheep Master Pro', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                                 SizedBox(height: 4),
                                 Text('Smart Herd & Livestock Manager', style: TextStyle(color: Colors.white70, fontSize: 12)),
@@ -276,7 +212,6 @@ jobs:
                       ),
                     ),
                     const SizedBox(height: 15),
-
                     Row(
                       children: [
                         Expanded(
@@ -284,7 +219,7 @@ jobs:
                             onPressed: _scanJhundAutoCount,
                             icon: const Icon(Icons.camera, color: Colors.white),
                             label: const Text('Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, padding: const EdgeInsets.symmetric(vertical: 12)),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700),
                           ),
                         ),
                         const SizedBox(width: 5),
@@ -292,23 +227,13 @@ jobs:
                           child: ElevatedButton.icon(
                             onPressed: _addNewSheep,
                             icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                            label: const Text('नयी भेड़', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, padding: const EdgeInsets.symmetric(vertical: 12)),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _scanOtherFlockForMissingSheep,
-                            icon: const Icon(Icons.search, color: Colors.white),
-                            label: const Text('Find Missing', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700, padding: const EdgeInsets.symmetric(vertical: 12)),
+                            label: const Text('Nayi Bhed', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 15),
-
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -324,17 +249,8 @@ jobs:
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('कुल भेड़ें: $totalSheep / $maxLimit', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.teal)),
+                              Text('Kul Bhedein: $totalSheep / $maxLimit', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.teal)),
                               const Icon(Icons.pets, color: Colors.teal),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildCountBox('Total', '$totalSheep', Colors.blue),
-                              _buildCountBox('Missing', '$missingCount', Colors.red),
-                              _buildCountBox('Active', '${totalSheep - missingCount}', Colors.green),
                             ],
                           ),
                         ],
@@ -345,119 +261,101 @@ jobs:
               );
             }
 
-            Widget _buildCountBox(String title, String count, Color color) {
-              return Container(
-                width: 100,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
-                child: Column(
-                  children: [
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 12)),
-                    const SizedBox(height: 5),
-                    Text(count, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            Widget _buildCattleTab() {
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton.icon(
+                      onPressed: _addNewSheep,
+                      icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                      label: const Text('Nayi Bhed Jodein', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, minimumSize: const Size(double.infinity, 45)),
+                    ),
+                  ),
+                  Expanded(
+                    child: sheepList.isEmpty
+                        ? const Center(child: Text('Abhi tak koi bhed darj nahi ki gayi hai.'))
+                        : GridView.builder(
+                            padding: const EdgeInsets.all(12),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 0.8,
+                            ),
+                            itemCount: sheepList.length,
+                            itemBuilder: (context, index) {
+                              final sheep = sheepList[index];
+                              return Card(
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                                        child: Image.file(sheep.photo, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(sheep.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            }
+
+            @override
+            Widget build(BuildContext context) {
+              final List<Widget> pages = [
+                _buildSummaryTab(),
+                _buildCattleTab(),
+              ];
+
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('AI Sheep Master', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  backgroundColor: Colors.teal.shade700,
+                  centerTitle: true,
+                ),
+                body: pages[_currentIndex],
+                bottomNavigationBar: BottomNavigationBar(
+                  currentIndex: _currentIndex,
+                  type: BottomNavigationBarType.fixed,
+                  selectedItemColor: Colors.teal.shade700,
+                  unselectedItemColor: Colors.grey,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  items: const [
+                    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Summary'),
+                    BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Cattle'),
                   ],
                 ),
               );
             }
+          }
+          EOF
 
-            Future<void> _updateSheepPhoto(SheepModel sheep) async {
-              final XFile? newPhoto = await _picker.pickImage(source: ImageSource.camera);
-              if (newPhoto != null) {
-                setState(() {
-                  sheep.photo = File(newPhoto.path);
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('भेड़ की प्रोफाइल फोटो सफलतापूर्वक बदल दी गई है!'), backgroundColor: Colors.green),
-                );
-              }
-            }
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew || true
 
-            void _showSheepProfile(BuildContext context, SheepModel sheep) {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-                        const SizedBox(height: 15),
-                        Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.file(sheep.photo, height: 150, width: 150, fit: BoxFit.cover),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: CircleAvatar(
-                                backgroundColor: Colors.teal,
-                                radius: 18,
-                                child: IconButton(
-                                  icon: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
-                                  onPressed: () => _updateSheepPhoto(sheep),
-                                  tooltip: 'Photo Badlein',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 15),
-                        Text(sheep.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        Text('ID: ${sheep.id}', style: const TextStyle(color: Colors.grey)),
-                        const SizedBox(height: 10),
-                        ElevatedButton.icon(
-                          onPressed: () => _updateSheepPhoto(sheep),
-                          icon: const Icon(Icons.camera_alt, size: 16),
-                          label: const Text('Profile Photo Badlein'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, foregroundColor: Colors.white),
-                        ),
-                        const Divider(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _profileDetailItem('नस्ल (Breed)', sheep.breed),
-                            _profileDetailItem('आयु (Age)', sheep.age),
-                            _profileDetailItem('लिंग (Gender)', sheep.gender),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                setState(() {
-                                  sheep.isChecked = true;
-                                  sheep.isMissing = false;
-                                });
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('भेड़ उपस्थित (Verified) दर्ज हो गई!'), backgroundColor: Colors.green));
-                              },
-                              icon: const Icon(Icons.check, color: Colors.white),
-                              label: const Text('Verified', style: TextStyle(color: Colors.white)),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                setState(() {
-                                  sheep.isMissing = true;
-                                  sheep.isChecked = false;
-                                });
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('भेड़ गुम (Missing) चिह्नित हो गई!'), backgroundColor: Colors.red));
-                              },
-                              icon: const Icon(Icons.close, color: Colors.white),
-                              label: const Text('Missing', style: TextStyle(color: Colors.white)),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
+      - name: Build APK
+        run: |
+          flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
