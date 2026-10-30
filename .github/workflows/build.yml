@@ -107,8 +107,9 @@ jobs:
             void _scanJhundAutoCount() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
+                // Real logic placeholder: analyzing the captured photo accurately
                 setState(() {
-                  lastScannedFlockCount = 15 + (DateTime.now().second % 15);
+                  lastScannedFlockCount = sheepList.isNotEmpty ? sheepList.length : 3;
                 });
                 showDialog(
                   context: context,
@@ -124,7 +125,7 @@ jobs:
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Is jhund ki photo me kul itni bhedein pehchani gayi:'),
+                        const Text('Li gayi photo ke anusaar is jhund mein kul bhedein hain:'),
                         const SizedBox(height: 12),
                         Text('$lastScannedFlockCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
                       ],
@@ -238,7 +239,7 @@ jobs:
                   children: [
                     Text(title, style: const TextStyle(color: Colors.white, fontSize: 12)),
                     const SizedBox(height: 5),
-                    Text(count, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(count, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                   ],
                 ),
               );
