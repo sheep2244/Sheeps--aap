@@ -116,13 +116,13 @@ jobs:
                       children: const [
                         Icon(Icons.pets, color: Colors.teal, size: 28),
                         SizedBox(width: 8),
-                        Text('Jhund Scan Complete', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
+                        Text('AI Jhund Scan', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Li gayi photo me kul bhedein pehchani gayi hain:'),
+                        const Text('AI Analysis Result - Li gayi photo me kul bhedein:'),
                         const SizedBox(height: 12),
                         Text('$exactCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
                       ],
@@ -182,7 +182,7 @@ jobs:
                           child: ElevatedButton.icon(
                             onPressed: _scanJhundAutoCount,
                             icon: const Icon(Icons.camera, color: Colors.white),
-                            label: const Text('Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            label: const Text('AI Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700),
                           ),
                         ),
