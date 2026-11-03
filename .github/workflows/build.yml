@@ -28,18 +28,23 @@ jobs:
 
       - name: Add Dependencies
         run: |
-          flutter pub add image_picker
+          flutter pub add image_picker http
 
       - name: Overwrite main.dart
         run: |
           cat << 'EOF' > lib/main.dart
+          import 'dart:convert';
           import 'dart:io';
           import 'package:flutter/material.dart';
           import 'package:image_picker/image_picker.dart';
+          import 'package:http/http.dart' as http;
 
           void main() {
             runApp(const SheepsApp());
           }
+
+          // **YAHAN APNI GEMINI API KEY DALEIN**
+          const String apiKey = "YOUR_GEMINI_API_KEY";
 
           class SheepModel {
             final String id;
@@ -83,8 +88,8 @@ jobs:
             int _currentIndex = 0;
             final List<SheepModel> sheepList = [];
             final ImagePicker _picker = ImagePicker();
+            bool _isLoading = false;
 
-            // Feature 1: Individual Sheep Profile/Cattle List Add
             Future<void> _addNewSheep() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
@@ -104,44 +109,89 @@ jobs:
               }
             }
 
-            // Feature 2: Jhund Scan & Count
-            void _scanJhundAutoCount() async {
+            // Real AI Image Analysis with Gemini API
+            Future<void> _scanJhundAutoCount() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-              if (photo != null) {
-                int exactCount = 2; // Real count representation based on camera input
+              if (photo == null) return;
 
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    title: Row(
-                      children: const [
-                        Icon(Icons.pets, color: Colors.teal, size: 28),
-                        SizedBox(width: 8),
-                        Text('Jhund Scan Result', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Li gayi photo me kul bhedein hain:'),
-                        const SizedBox(height: 12),
-                        Text('$exactCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
-                      ],
-                    ),
-                    actions: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Thik Hai', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
+              setState(() {
+                _isLoading = true;
+              });
+
+              try {
+                final bytes = await File(photo.path).readAsBytes();
+                final base64Image = base64Encode(bytes);
+
+                final url = Uri.parse(
+                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey');
+
+                final response = await http.post(
+                  url,
+                  headers: {'Content-Type': 'application/json'},
+                  body: jsonEncode({
+                    "contents": [
+                      {
+                        "parts": [
+                          {
+                            "text": "Count the total number of sheep in this image. Give a clear, direct answer in Hindi/Hinglish stating the exact count."
+                          },
+                          {
+                            "inline_data": {
+                              "mime_type": "image/jpeg",
+                              "data": base64Image
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }),
                 );
+
+                setState(() {
+                  _isLoading = false;
+                });
+
+                String resultText = "AI Scan pure tarike se nahi ho paya.";
+                if (response.statusCode == 200) {
+                  final data = jsonDecode(response.body);
+                  resultText = data['candidates'][0]['content']['parts'][0]['text'] ?? "Ginti nahi ho saki.";
+                } else {
+                  resultText = "API Key check karein ya Internet connect karein.";
+                }
+
+                _showResultDialog(resultText);
+              } catch (e) {
+                setState(() {
+                  _isLoading = false;
+                });
+                _showResultDialog("Error: AI Connection fail ho gaya.");
               }
             }
 
-            // Feature 3: Summary Dashboard Tab
+            void _showResultDialog(String message) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  title: Row(
+                    children: const [
+                      Icon(Icons.auto_awesome, color: Colors.teal, size: 28),
+                      SizedBox(width: 8),
+                      Text('Real AI Scan Result', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  content: Text(message, style: const TextStyle(fontSize: 16)),
+                  actions: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Thik Hai', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             Widget _buildSummaryTab() {
               int totalSheep = sheepList.length;
               int missingCount = sheepList.where((s) => s.isMissing).length;
@@ -169,9 +219,9 @@ jobs:
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('AI Sheep Master', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                Text('AI Sheep Master Pro', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                                 SizedBox(height: 4),
-                                Text('Simple & Fast Livestock Manager', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                Text('Powered by Gemini Vision AI', style: TextStyle(color: Colors.white70, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -179,27 +229,35 @@ jobs:
                       ),
                     ),
                     const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _scanJhundAutoCount,
-                            icon: const Icon(Icons.camera, color: Colors.white),
-                            label: const Text('Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700),
-                          ),
+                    if (_isLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: CircularProgressIndicator(),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _addNewSheep,
-                            icon: const Icon(Icons.add_a_photo, color: Colors.white),
-                            label: const Text('Nayi Bhed', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _scanJhundAutoCount,
+                              icon: const Icon(Icons.center_focus_strong, color: Colors.white),
+                              label: const Text('AI Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _addNewSheep,
+                              icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                              label: const Text('Nayi Bhed', style: TextStyle(color: Colors.white, fontSize: 11)),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
+                            ),
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -233,7 +291,7 @@ jobs:
             Widget _buildCountBox(String title, String count, Color color) {
               return Container(
                 width: 90,
-                padding: const EdgeInsets.all(10),
+                padding: const TextStyle().decoration == null ? const EdgeInsets.all(10) : const EdgeInsets.all(10),
                 decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
                 child: Column(
                   children: [
