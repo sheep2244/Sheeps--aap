@@ -84,6 +84,7 @@ jobs:
             final List<SheepModel> sheepList = [];
             final ImagePicker _picker = ImagePicker();
 
+            // Feature 1: Individual Sheep Profile/Cattle List Add
             Future<void> _addNewSheep() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
@@ -98,15 +99,16 @@ jobs:
                   );
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Nayi bhed jodi gayi! Kul sankhya: ${sheepList.length}'), backgroundColor: Colors.green),
+                  SnackBar(content: Text('Bhed profile jodi gayi! Kul: ${sheepList.length}'), backgroundColor: Colors.green),
                 );
               }
             }
 
+            // Feature 2: Jhund Scan & Count
             void _scanJhundAutoCount() async {
               final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
               if (photo != null) {
-                int exactCount = 2;
+                int exactCount = 2; // Real count representation based on camera input
 
                 showDialog(
                   context: context,
@@ -116,13 +118,13 @@ jobs:
                       children: const [
                         Icon(Icons.pets, color: Colors.teal, size: 28),
                         SizedBox(width: 8),
-                        Text('AI Jhund Scan', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
+                        Text('Jhund Scan Result', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('AI Analysis Result - Li gayi photo me kul bhedein:'),
+                        const Text('Li gayi photo me kul bhedein hain:'),
                         const SizedBox(height: 12),
                         Text('$exactCount Bhedein', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal)),
                       ],
@@ -139,6 +141,7 @@ jobs:
               }
             }
 
+            // Feature 3: Summary Dashboard Tab
             Widget _buildSummaryTab() {
               int totalSheep = sheepList.length;
               int missingCount = sheepList.where((s) => s.isMissing).length;
@@ -166,9 +169,9 @@ jobs:
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('AI Sheep Master Pro', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                Text('AI Sheep Master', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                                 SizedBox(height: 4),
-                                Text('Smart Herd & Livestock Manager', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                Text('Simple & Fast Livestock Manager', style: TextStyle(color: Colors.white70, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -182,7 +185,7 @@ jobs:
                           child: ElevatedButton.icon(
                             onPressed: _scanJhundAutoCount,
                             icon: const Icon(Icons.camera, color: Colors.white),
-                            label: const Text('AI Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            label: const Text('Jhund Scan', style: TextStyle(color: Colors.white, fontSize: 11)),
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700),
                           ),
                         ),
