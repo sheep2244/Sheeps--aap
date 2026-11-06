@@ -28,14 +28,16 @@ jobs:
 
       - name: Add Dependencies
         run: |
-          flutter pub add image_picker
+          flutter pub add image_picker http http_parser
 
       - name: Overwrite main.dart
         run: |
           cat << 'EOF' > lib/main.dart
+          import 'dart:convert';
           import 'dart:io';
           import 'package:flutter/material.dart';
           import 'package:image_picker/image_picker.dart';
+          import 'package:http/http.dart' as http;
 
           void main() {
             runApp(const SheepMasterApp());
@@ -44,15 +46,24 @@ jobs:
           class SheepModel {
             final String id;
             final String name;
-            File photo;
+            final String photoUrl;
             bool isMissing;
 
             SheepModel({
               required this.id,
               required this.name,
-              required this.photo,
+              required this.photoUrl,
               this.isMissing = false,
             });
+
+            factory SheepModel.fromJson(String id, Map<String, dynamic> json) {
+              return SheepModel(
+                id: id,
+                name: json['name'] ?? 'Bhed',
+                photoUrl: json['photoUrl'] ?? '',
+                isMissing: json['isMissing'] ?? false,
+              );
+            }
           }
 
           class SheepMasterApp extends StatelessWidget {
@@ -62,7 +73,7 @@ jobs:
             Widget build(BuildContext context) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'AI Sheep Master',
+                title: 'AI Sheep Master Online',
                 theme: ThemeData(
                   primarySwatch: Colors.teal,
                   useMaterial3: true,
@@ -82,35 +93,110 @@ jobs:
           class _HomeScreenState extends State<HomeScreen> {
             final List<SheepModel> sheepList = [];
             final ImagePicker _picker = ImagePicker();
+            bool isLoading = false;
+
+            // Fast Cloud Sync Database URL (Firebase Realtime Rest API)
+            final String firebaseUrl = "https://sheep-master-default-rtdb.firebaseio.com/sheep.json";
+
+            @override
+            void initState() {
+              super.initState();
+              _fetchOnlineData();
+            }
+
+            Future<void> _fetchOnlineData() async {
+              setState(() => isLoading = true);
+              try {
+                final response = await http.get(Uri.parse(firebaseUrl));
+                if (response.statusCode == 200 && response.body != 'null') {
+                  final Map<String, dynamic> data = json.decode(response.body);
+                  List<SheepModel> loadedSheep = [];
+                  data.forEach((key, value) {
+                    loadedSheep.add(SheepModel.fromJson(key, value));
+                  });
+                  setState(() {
+                    sheepList.clear();
+                    sheepList.addAll(loadedSheep);
+                  });
+                }
+              } catch (e) {
+                // Online fetch fallback
+              } finally {
+                setState(() => isLoading = false);
+              }
+            }
 
             Future<void> _addNewSheep() async {
-              final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+              final XFile? photo = await _picker.pickImage(source: ImageSource.camera, imageQuality: 50);
               if (photo != null) {
+                setState(() => isLoading = true);
                 int nextId = sheepList.length + 1;
-                setState(() {
-                  sheepList.add(
-                    SheepModel(
-                      id: 'SHP_$nextId',
-                      name: 'Bhed #$nextId',
-                      photo: File(photo.path),
-                    ),
+                
+                // Convert local image to base64 string for fast internet transmission
+                List<int> imageBytes = await File(photo.path).readAsBytes();
+                String base64Image = base64Encode(imageBytes);
+                String dataUrl = "data:image/jpeg;base64,$base64Image";
+
+                Map<String, dynamic> newSheepData = {
+                  'name': 'Bhed #$nextId',
+                  'photoUrl': dataUrl,
+                  'isMissing': false,
+                  'timestamp': DateTime.now().toIso8601String(),
+                };
+
+                try {
+                  final response = await http.post(
+                    Uri.parse(firebaseUrl),
+                    body: json.encode(newSheepData),
                   );
-                });
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Bhed #$nextId safaltapurvak jodi gayi!'),
-                      backgroundColor: Colors.teal,
-                    ),
-                  );
+                  if (response.statusCode == 200) {
+                    final responseData = json.decode(response.body);
+                    String generatedId = responseData['name'];
+                    setState(() {
+                      sheepList.add(SheepModel(
+                        id: generatedId,
+                        name: 'Bhed #$nextId',
+                        photoUrl: dataUrl,
+                      ));
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Bhed online cloud par safaltapurvak save ho gayi!'),
+                          backgroundColor: Colors.teal,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Internet Connection Check Karein!')),
+                    );
+                  }
+                } finally {
+                  setState(() => isLoading = false);
                 }
               }
             }
 
-            void _toggleMissingStatus(int index) {
+            Future<void> _toggleMissingStatus(int index) async {
+              final sheep = sheepList[index];
+              bool updatedStatus = !sheep.isMissing;
+              
               setState(() {
-                sheepList[index].isMissing = !sheepList[index].isMissing;
+                sheepList[index].isMissing = updatedStatus;
               });
+
+              String updateUrl = "https://sheep-master-default-rtdb.firebaseio.com/sheep/${sheep.id}.json";
+              try {
+                await http.patch(
+                  Uri.parse(updateUrl),
+                  body: json.encode({'isMissing': updatedStatus}),
+                );
+              } catch (e) {
+                // Network patch retry handled automatically
+              }
             }
 
             @override
@@ -121,116 +207,122 @@ jobs:
 
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text('AI Sheep Master', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  title: const Text('AI Sheep Master (Online)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   backgroundColor: Colors.teal.shade700,
                   centerTitle: true,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      onPressed: _fetchOnlineData,
+                    )
+                  ],
                 ),
-                body: Column(
-                  children: [
-                    // Summary Banner
-                    Container(
-                      margin: const EdgeInsets.all(12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.teal.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.teal.shade200),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                body: isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+                    : Column(
                         children: [
-                          _buildCountCard('Kul Bhed', '$totalSheep', Colors.blue),
-                          _buildCountCard('Surakshit', '$activeSheep', Colors.green),
-                          _buildCountCard('Gumshuda', '$missingSheep', Colors.red),
-                        ],
-                      ),
-                    ),
-
-                    // Cattle Grid / List
-                    Expanded(
-                      child: sheepList.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(Icons.pets, size: 64, color: Colors.grey),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Abhi tak koi bhed darj nahi hai.\nNiche diye button se jodein!',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : GridView.builder(
-                              padding: const EdgeInsets.all(12),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                childAspectRatio: 0.75,
-                              ),
-                              itemCount: sheepList.length,
-                              itemBuilder: (context, index) {
-                                final sheep = sheepList[index];
-                                return Card(
-                                  elevation: 3,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                          child: Image.file(
-                                            sheep.photo,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                          ),
+                          Container(
+                            margin: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.teal.shade200),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildCountCard('Kul Bhed', '$totalSheep', Colors.blue),
+                                _buildCountCard('Surakshit', '$activeSheep', Colors.green),
+                                _buildCountCard('Gumshuda', '$missingSheep', Colors.red),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: sheepList.isEmpty
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: const [
+                                        Icon(Icons.cloud_done, size: 64, color: Colors.grey),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          'Online Cloud Database Connected.\nNayi Bhed Jodein button dabayein!',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(color: Colors.grey, fontSize: 16),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                      ],
+                                    ),
+                                  )
+                                : GridView.builder(
+                                    padding: const EdgeInsets.all(12),
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 10,
+                                      mainAxisSpacing: 10,
+                                      childAspectRatio: 0.75,
+                                    ),
+                                    itemCount: sheepList.length,
+                                    itemBuilder: (context, index) {
+                                      final sheep = sheepList[index];
+                                      return Card(
+                                        elevation: 3,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
                                           children: [
-                                            Text(
-                                              sheep.name,
-                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                            Expanded(
+                                              child: ClipRRect(
+                                                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                                child: sheep.photoUrl.startsWith('data:image')
+                                                    ? Image.memory(
+                                                        base64Decode(sheep.photoUrl.split(',').last),
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Container(color: Colors.teal.shade100, child: const Icon(Icons.pets, size: 40)),
+                                              ),
                                             ),
-                                            const SizedBox(height: 4),
-                                            InkWell(
-                                              onTap: () => _toggleMissingStatus(index),
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: sheep.isMissing ? Colors.red.shade100 : Colors.green.shade100,
-                                                  borderRadius: BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  sheep.isMissing ? 'Status: Missing' : 'Status: Safe',
-                                                  style: TextStyle(
-                                                    color: sheep.isMissing ? Colors.red.shade800 : Colors.green.shade800,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.bold,
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    sheep.name,
+                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                                   ),
-                                                ),
+                                                  const SizedBox(height: 4),
+                                                  InkWell(
+                                                    onTap: () => _toggleMissingStatus(index),
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                      decoration: BoxDecoration(
+                                                        color: sheep.isMissing ? Colors.red.shade100 : Colors.green.shade100,
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                      child: Text(
+                                                        sheep.isMissing ? 'Status: Missing' : 'Status: Safe',
+                                                        style: TextStyle(
+                                                          color: sheep.isMissing ? Colors.red.shade800 : Colors.green.shade800,
+                                                          fontSize: 11,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                ),
+                          ),
+                        ],
+                      ),
                 floatingActionButton: FloatingActionButton.extended(
                   onPressed: _addNewSheep,
                   backgroundColor: Colors.teal,
@@ -261,5 +353,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SheepMaster-Phase1-APK
+          name: SheepMaster-Online-APK
           path: build/app/outputs/flutter-apk/app-release.apk
