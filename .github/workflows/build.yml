@@ -26,6 +26,10 @@ jobs:
           rm -rf android
           flutter create . --org com.example --project-name sheep_master
 
+      - name: Update Kotlin Version in build.gradle
+        run: |
+          sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/" android/build.gradle || true
+
       - name: Add Dependencies
         run: |
           flutter pub add image_picker http geolocator geocoding
@@ -157,7 +161,6 @@ jobs:
               }
             }
 
-            // Feature 1: GPS Location Fetcher
             Future<String> _getCurrentLocation() async {
               bool serviceEnabled;
               LocationPermission permission;
@@ -183,7 +186,6 @@ jobs:
                 setState(() => isLoading = true);
                 int nextId = sheepList.length + 1;
                 
-                // Get Location automatically
                 String loc = await _getCurrentLocation();
 
                 List<int> imageBytes = await File(photo.path).readAsBytes();
@@ -240,7 +242,6 @@ jobs:
               } catch (e) {}
             }
 
-            // Feature 3: Update Health Notes Dialog
             void _editHealthNotes(SheepModel sheep) {
               TextEditingController noteController = TextEditingController(text: sheep.healthNotes);
               showDialog(
@@ -288,7 +289,6 @@ jobs:
                     ? const Center(child: CircularProgressIndicator(color: Colors.teal))
                     : Column(
                         children: [
-                          // Summary Card
                           Container(
                             margin: const EdgeInsets.all(12),
                             padding: const EdgeInsets.all(16),
@@ -306,8 +306,6 @@ jobs:
                               ],
                             ),
                           ),
-
-                          // Feature 2: Search Box
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12.0),
                             child: TextField(
@@ -322,8 +320,6 @@ jobs:
                             ),
                           ),
                           const SizedBox(height: 10),
-
-                          // List / Grid
                           Expanded(
                             child: filteredSheepList.isEmpty
                                 ? const Center(child: Text('Koi bhed nahi mili!', style: TextStyle(color: Colors.grey, fontSize: 16)))
