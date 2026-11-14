@@ -573,4 +573,68 @@ jobs:
                                   padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(1
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: Colors.teal.shade100),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.analytics, color: Colors.teal, size: 18),
+                                          const SizedBox(width: 6),
+                                          Text(isHindi ? 'भेड़ प्रबंधन (Live Counting)' : 'Sheep Management', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: [
+                                          _buildCountCard(isHindi ? 'Kul Bhed' : 'Total', '$totalSheep', Colors.blue),
+                                          _buildCountCard(isHindi ? 'Surakshit' : 'Safe', '$activeSheep', Colors.green),
+                                          _buildCountCard(isHindi ? 'Gumshuda' : 'Missing', '$missingSheep', Colors.red),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                InkWell(
+                                  onTap: _showMissingSheepDialog,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: Colors.red.shade200),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(10)),
+                                          child: const Icon(Icons.location_on, color: Colors.red, size: 28),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(isHindi ? 'खोई हुई भेड़ की लोकेशन' : 'Missing Sheep Location', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                              Text(isHindi ? 'गुमशुदा भेड़ का आखिरी GPS देखें ($missingSheep)' : 'Check last GPS of missing sheep ($missingSheep)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                            ],
+                                          ),
+                                        ),
+                                        const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(isHindi ? 'पशुपालन सलाह एवं देखभाल' : 'Sheep Care & Guidance', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildAdviceCard(
+                                        isHindi ? 'खाना-पीना' : 'Feed
